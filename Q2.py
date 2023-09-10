@@ -1,5 +1,6 @@
 import heapq
 
+
 class Vertex:
     def __init__(self, name):
         self.name = name
@@ -17,7 +18,7 @@ class Edge:
 
 class Graph:
     def __init__(self, paths):
-        self.vertices = []
+        self.vertices = {}
         for path in paths:
             self.add_path(path)
 
@@ -25,26 +26,23 @@ class Graph:
         from_vertex = self.get_vertex(path[0])
         if from_vertex is None:
             from_vertex = Vertex(path[0])
-            self.vertices.append(from_vertex)
+            self.vertices[path[0]] = from_vertex
         to_vertex = self.get_vertex(path[1])
         if to_vertex is None:
             to_vertex = Vertex(path[1])
-            self.vertices.append(to_vertex)
+            self.vertices[path[1]] = to_vertex
         weight = path[2]
         edge = Edge(to_vertex, weight)
         from_vertex.add_edge(edge)
 
     def get_vertex(self, name):
-        for vertex in self.vertices:
-            if vertex.name == name:
-                return vertex
-        return None
+        return self.vertices.get(name)
 
     def update_distance(self, current_vertex, edge, distances, previous_vertices):
-        new_distance = distances[self.vertices.index(current_vertex)] + edge.weight
-        if new_distance < distances[self.vertices.index(edge.vertex)]:
-            distances[self.vertices.index(edge.vertex)] = new_distance
-            previous_vertices[self.vertices.index(edge.vertex)] = current_vertex
+        new_distance = distances[current_vertex] + edge.weight
+        if new_distance < distances[edge.vertex]:
+            distances[edge.vertex] = new_distance
+            previous_vertices[edge.vertex] = current_vertex
 
     def update_distances(self, current_vertex, distances, previous_vertices):
         for edge in current_vertex.edges:
@@ -52,12 +50,17 @@ class Graph:
 
     def construct_path(self, start_name, exits, distances, previous_vertices):
         path = []
-        exit_distances = [distances[self.vertices.index(self.get_vertex(exit))] for exit in exits]
+        exit_distances = [distances[self.get_vertex(exit)] for exit in exits]
+
+        # If all exit vertices are unreachable from the start vertex
+        if all(distance == float('inf') for distance in exit_distances):
+            return (float('inf'), [])
+
         current_vertex = self.get_vertex(exits[exit_distances.index(min(exit_distances))])
 
-        while previous_vertices[self.vertices.index(current_vertex)] is not None:
+        while previous_vertices[current_vertex] is not None:
             path.append(current_vertex.name)
-            current_vertex = previous_vertices[self.vertices.index(current_vertex)]
+            current_vertex = previous_vertices[current_vertex]
 
         if path:
             path.append(start_name)
@@ -66,30 +69,30 @@ class Graph:
 
     def shortest_path_to_exit(self, start_name, exits):
         start_vertex = self.get_vertex(start_name)
-        distances = [float('inf')] * len(self.vertices)
-        previous_vertices = [None] * len(self.vertices)
-        distances[self.vertices.index(start_vertex)] = 0
+        distances = {vertex: float('inf') for vertex in self.vertices.values()}
+        previous_vertices = {vertex: None for vertex in self.vertices.values()}
+        distances[start_vertex] = 0
         vertices = [(0, start_vertex)]
 
         while vertices:
             current_distance, current_vertex = heapq.heappop(vertices)
-            if current_distance > distances[self.vertices.index(current_vertex)]:
+            if current_distance > distances[current_vertex]:
                 continue
             self.update_distances(current_vertex, distances, previous_vertices)
             for edge in current_vertex.edges:
-                if distances[self.vertices.index(edge.vertex)] > distances[
-                    self.vertices.index(current_vertex)] + edge.weight:
-                    heapq.heappush(vertices,
-                                   (distances[self.vertices.index(current_vertex)] + edge.weight, edge.vertex))
+                if distances[edge.vertex] > distances[current_vertex] + edge.weight:
+                    heapq.heappush(vertices, (distances[current_vertex] + edge.weight, edge.vertex))
 
         return self.construct_path(start_name, exits, distances, previous_vertices)
 
 if __name__ == "__main__":
     # The paths represented as a list of tuples
-    paths = [(0, 1, 4), (0, 3, 2), (0, 2, 3), (2, 3, 2), (3, 0, 3)]
+    paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2),
+             (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4), (7, 8, 2),
+             (8, 7, 2), (7, 3, 2), (8, 0, 11), (4, 3, 1), (4, 8, 10)]
 
     # Creating a Graph object based on the given paths
     myfloor = Graph(paths)
 
     # Test the shortest_path_to_exit method
-    print(myfloor.shortest_path_to_exit(0, [1]))
+    print(myfloor.shortest_path_to_exit(5, [7]))
