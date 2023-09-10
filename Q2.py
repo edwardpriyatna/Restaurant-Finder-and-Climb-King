@@ -19,17 +19,20 @@ class Graph:
     def __init__(self, paths):
         self.vertices = []
         for path in paths:
-            from_vertex = self.get_vertex(path[0])
-            if from_vertex is None:
-                from_vertex = Vertex(path[0])
-                self.vertices.append(from_vertex)
-            to_vertex = self.get_vertex(path[1])
-            if to_vertex is None:
-                to_vertex = Vertex(path[1])
-                self.vertices.append(to_vertex)
-            weight = path[2]
-            edge = Edge(to_vertex, weight)
-            from_vertex.add_edge(edge)
+            self.add_path(path)
+
+    def add_path(self, path):
+        from_vertex = self.get_vertex(path[0])
+        if from_vertex is None:
+            from_vertex = Vertex(path[0])
+            self.vertices.append(from_vertex)
+        to_vertex = self.get_vertex(path[1])
+        if to_vertex is None:
+            to_vertex = Vertex(path[1])
+            self.vertices.append(to_vertex)
+        weight = path[2]
+        edge = Edge(to_vertex, weight)
+        from_vertex.add_edge(edge)
 
     def get_vertex(self, name):
         for vertex in self.vertices:
@@ -37,12 +40,15 @@ class Graph:
                 return vertex
         return None
 
+    def update_distance(self, current_vertex, edge, distances, previous_vertices):
+        new_distance = distances[self.vertices.index(current_vertex)] + edge.weight
+        if new_distance < distances[self.vertices.index(edge.vertex)]:
+            distances[self.vertices.index(edge.vertex)] = new_distance
+            previous_vertices[self.vertices.index(edge.vertex)] = current_vertex
+
     def update_distances(self, current_vertex, distances, previous_vertices):
         for edge in current_vertex.edges:
-            new_distance = distances[self.vertices.index(current_vertex)] + edge.weight
-            if new_distance < distances[self.vertices.index(edge.vertex)]:
-                distances[self.vertices.index(edge.vertex)] = new_distance
-                previous_vertices[self.vertices.index(edge.vertex)] = current_vertex
+            self.update_distance(current_vertex, edge, distances, previous_vertices)
 
     def construct_path(self, start_name, exits, distances, previous_vertices):
         path = []
@@ -71,8 +77,10 @@ class Graph:
                 continue
             self.update_distances(current_vertex, distances, previous_vertices)
             for edge in current_vertex.edges:
-                if distances[self.vertices.index(edge.vertex)] > distances[self.vertices.index(current_vertex)] + edge.weight:
-                    heapq.heappush(vertices,(distances[self.vertices.index(current_vertex)] + edge.weight, edge.vertex))
+                if distances[self.vertices.index(edge.vertex)] > distances[
+                    self.vertices.index(current_vertex)] + edge.weight:
+                    heapq.heappush(vertices,
+                                   (distances[self.vertices.index(current_vertex)] + edge.weight, edge.vertex))
 
         return self.construct_path(start_name, exits, distances, previous_vertices)
 
@@ -84,5 +92,4 @@ if __name__ == "__main__":
     myfloor = Graph(paths)
 
     # Test the shortest_path_to_exit method
-    print(myfloor.shortest_path_to_exit(3, [2,0,1]))
-
+    print(myfloor.shortest_path_to_exit(0, [1]))
