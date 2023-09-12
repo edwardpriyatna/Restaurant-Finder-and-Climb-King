@@ -1,98 +1,53 @@
-import heapq
+class Path:
+    def __init__(self, destination, travel_time):
+        self.destination = destination
+        self.travel_time = travel_time
 
+    def __str__(self):
+        return f'Path(destination={self.destination}, travel_time={self.travel_time})'
 
-class Vertex:
-    def __init__(self, name):
-        self.name = name
-        self.edges = []
-
-    def add_edge(self, edge):
-        self.edges.append(edge)
-
-
-class Edge:
-    def __init__(self, vertex, weight):
-        self.vertex = vertex
-        self.weight = weight
-
-
-class Graph:
-    def __init__(self, paths):
-        self.vertices = {}
-        for path in paths:
-            self.add_path(path)
+class Location:
+    def __init__(self, location_id):
+        self.location_id = location_id
+        self.monster_defeat_time = 0
+        self.paths = []
 
     def add_path(self, path):
-        from_vertex = self.get_vertex(path[0])
-        if from_vertex is None:
-            from_vertex = Vertex(path[0])
-            self.vertices[path[0]] = from_vertex
-        to_vertex = self.get_vertex(path[1])
-        if to_vertex is None:
-            to_vertex = Vertex(path[1])
-            self.vertices[path[1]] = to_vertex
-        weight = path[2]
-        edge = Edge(to_vertex, weight)
-        from_vertex.add_edge(edge)
+        self.paths.append(path)
 
-    def get_vertex(self, name):
-        return self.vertices.get(name)
+    def add_key(self, monster_defeat_time):
+        self.monster_defeat_time = monster_defeat_time
 
-    def update_distance(self, current_vertex, edge, distances, previous_vertices):
-        new_distance = distances[current_vertex] + edge.weight
-        if new_distance < distances[edge.vertex]:
-            distances[edge.vertex] = new_distance
-            previous_vertices[edge.vertex] = current_vertex
+    def __str__(self):
+        paths_str = ', '.join(str(path) for path in self.paths)
+        return f'Location(location_id={self.location_id}, monster_defeat_time={self.monster_defeat_time}, paths=[{paths_str}])'
 
-    def update_distances(self, current_vertex, distances, previous_vertices):
-        for edge in current_vertex.edges:
-            self.update_distance(current_vertex, edge, distances, previous_vertices)
+class FloorGraph:
+    def __init__(self, paths_list, keys_list):
+        self.total_locations = len(paths_list)
+        self.locations = [Location(i) for i in range(self.total_locations)]
+        self.add_paths(paths_list)
+        self.add_keys(keys_list)
 
-    def construct_path(self, start_name, exits, distances, previous_vertices):
-        path = []
-        exit_distances = [distances[self.get_vertex(exit)] for exit in exits]
+    def add_paths(self, paths_list):
+        for path in paths_list:
+            start_location, destination_location, travel_time = path
+            path_obj = Path(destination_location, travel_time)
+            self.locations[start_location].add_path(path_obj)
 
-        # If all exit vertices are unreachable from the start vertex
-        if all(distance == float('inf') for distance in exit_distances):
-            return (float('inf'), [])
+    def add_keys(self, keys_list):
+        for key in keys_list:
+            location_id, monster_defeat_time = key
+            self.locations[location_id].add_key(monster_defeat_time)
 
-        current_vertex = self.get_vertex(exits[exit_distances.index(min(exit_distances))])
-
-        while previous_vertices[current_vertex] is not None:
-            path.append(current_vertex.name)
-            current_vertex = previous_vertices[current_vertex]
-
-        if path:
-            path.append(start_name)
-
-        return (min(exit_distances), list(reversed(path)))
-
-    def shortest_path_to_exit(self, start_name, exits):
-        start_vertex = self.get_vertex(start_name)
-        distances = {vertex: float('inf') for vertex in self.vertices.values()}
-        previous_vertices = {vertex: None for vertex in self.vertices.values()}
-        distances[start_vertex] = 0
-        vertices = [(0, start_vertex)]
-
-        while vertices:
-            current_distance, current_vertex = heapq.heappop(vertices)
-            if current_distance > distances[current_vertex]:
-                continue
-            self.update_distances(current_vertex, distances, previous_vertices)
-            for edge in current_vertex.edges:
-                if distances[edge.vertex] > distances[current_vertex] + edge.weight:
-                    heapq.heappush(vertices, (distances[current_vertex] + edge.weight, edge.vertex))
-
-        return self.construct_path(start_name, exits, distances, previous_vertices)
+    def __str__(self):
+        return '\n'.join(str(location) for location in self.locations)
 
 if __name__ == "__main__":
     # The paths represented as a list of tuples
-    paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2),
-             (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4), (7, 8, 2),
-             (8, 7, 2), (7, 3, 2), (8, 0, 11), (4, 3, 1), (4, 8, 10)]
-
-    # Creating a Graph object based on the given paths
-    myfloor = Graph(paths)
-
-    # Test the shortest_path_to_exit method
-    print(myfloor.shortest_path_to_exit(5, [7]))
+    paths = [(0, 1, 4), (0, 3, 2), (0, 2, 3), (2, 3, 2), (3, 0, 3)]
+    # The keys represented as a list of tuples
+    keys = [(0, 5), (3, 2), (1, 3)]
+    # Creating a FloorGraph object based on the given paths and keys
+    myfloor = FloorGraph(paths, keys)
+    print(myfloor)
