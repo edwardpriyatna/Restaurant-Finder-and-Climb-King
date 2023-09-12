@@ -50,11 +50,20 @@ class FloorGraph:
     def __str__(self) -> str:
         return '\n'.join(str(location) for location in self.locations)
 
+    def get_vertices_with_keys(self) -> List[Location]:
+        return [location for location in self.locations if location.monster_defeat_time > 0]
+
 if __name__ == "__main__":
     # The paths represented as a list of tuples
-    paths = [(0, 1, 4), (0, 3, 2), (0, 2, 3), (2, 3, 2), (3, 0, 3)]
+    paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2),
+             (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4), (7, 8, 2),
+             (8, 7, 2), (7, 3, 2), (8, 0, 11), (4, 3, 1), (4, 8, 10)]
     # The keys represented as a list of tuples
-    keys = [(0, 5), (3, 2), (1, 3)]
-    # Creating a FloorGraph object based on the given paths and keys
+    keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
+    # Creating a FloorGraph object based on the given paths
     myfloor = FloorGraph(paths, keys)
     print(myfloor)
+    print('testign function to get vertices with keys')
+    vertices_with_keys = myfloor.get_vertices_with_keys()
+    for vertex in vertices_with_keys:
+        print(vertex)
