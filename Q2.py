@@ -1,5 +1,5 @@
-from typing import List, Tuple
-
+from typing import List, Tuple, Optional
+import heapq
 class Location:
     def __init__(self, id: int, monster_defeat_time: int = 0):
         self.id = id
@@ -44,6 +44,41 @@ class FloorGraph:
         locations_str = '\n'.join([str(location) for location in self.locations])
         return f"FloorMap:\n{locations_str}"
 
+    def climb(self, start: int, exits: List[int]) -> Optional[Tuple[int, List[int]]]:
+        # Initialize the priority queue with the start location
+        queue = [(0, start, [])]
+
+        # Initialize a list to keep track of the shortest time to reach each location
+        shortest_times = [float('inf')] * self.total_locations
+        shortest_times[start] = 0
+
+        # While there are locations to visit
+        while queue:
+            # Get the location with the shortest travel time so far
+            time_so_far, current_location_id, route_so_far = heapq.heappop(queue)
+
+            # If this location has a key and it's one of the exits
+            if self.locations[current_location_id].monster_defeat_time > 0 and current_location_id in exits:
+                # Return the total time and the route including this location
+                return time_so_far + self.locations[current_location_id].monster_defeat_time, route_so_far + [
+                    current_location_id]
+
+            # If this is a new shortest time to this location
+            if time_so_far < shortest_times[current_location_id]:
+                # Update the shortest time to this location
+                shortest_times[current_location_id] = time_so_far
+
+                # For each path from this location
+                for path in self.locations[current_location_id].paths:
+                    # Add the location at the end of the path to the queue with the updated total time and route
+                    heapq.heappush(queue, (time_so_far + path.travel_time + (self.locations[
+                                                                                 path.end_location.id].monster_defeat_time if path.end_location.id != current_location_id else 0),
+                                           path.end_location.id,
+                                           route_so_far + [current_location_id]))
+
+        # If no route was found that includes defeating a monster and reaching an exit
+        return None
+
 if __name__ == "__main__":
     # The paths represented as a list of tuples
     paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2),
@@ -54,4 +89,7 @@ if __name__ == "__main__":
     # Creating a FloorGraph object based on the given paths
     myfloor = FloorGraph(paths, keys)
     print(myfloor)
+    start = 1
+    exits = [7, 2, 4]
+    print(myfloor.climb(start,exits))
 
