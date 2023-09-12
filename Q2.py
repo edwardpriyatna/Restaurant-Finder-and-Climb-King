@@ -1,57 +1,48 @@
 from typing import List, Tuple
 
+class Location:
+    def __init__(self, id: int, monster_defeat_time: int = 0):
+        self.id = id
+        self.monster_defeat_time = monster_defeat_time
+        self.paths = []
+
+    def __str__(self):
+        paths_str = ', '.join([str(path) for path in self.paths])
+        return f"Location(id={self.id}, monster_defeat_time={self.monster_defeat_time}, paths=[{paths_str}])"
+
 class Path:
-    def __init__(self, destination: int, travel_time: int):
-        self.destination = destination
+    def __init__(self, start_location: Location, end_location: Location, travel_time: int):
+        self.start_location = start_location
+        self.end_location = end_location
         self.travel_time = travel_time
 
-    def __str__(self) -> str:
-        return f'Path(destination={self.destination}, travel_time={self.travel_time})'
-
-class Location:
-    def __init__(self, location_id: int):
-        self.location_id = location_id
-        self.monster_defeat_time = 0
-        self.paths: List[Path] = []
-
-    def add_path(self, path: Path) -> None:
-        self.paths.append(path)
-
-    def add_key(self, monster_defeat_time: int) -> None:
-        self.monster_defeat_time = monster_defeat_time
-
-    def __str__(self) -> str:
-        paths_str = ', '.join(str(path) for path in self.paths)
-        return f'Location(location_id={self.location_id}, monster_defeat_time={self.monster_defeat_time}, paths=[{paths_str}])'
+    def __str__(self):
+        return f"Path(end_location={self.end_location.id}, travel_time={self.travel_time})"
 
 class FloorGraph:
-    def __init__(self, paths_list: List[Tuple[int, int, int]], keys_list: List[Tuple[int, int]]):
-        max_location_id = max(max(max(paths_list), max(keys_list)))
-        self.total_locations = max_location_id + 1
-        self.locations: List[Location] = [Location(i) for i in range(self.total_locations)]
-        self.add_paths(paths_list)
-        self.add_keys(keys_list)
-        self.sort_locations()
+    def __init__(self, paths: List[Tuple[int, int, int]], keys: List[Tuple[int, int]]):
+        self.total_locations = self._get_total_locations(paths)
+        self.locations = [Location(i) for i in range(self.total_locations)]
+        self._populate_locations_with_paths(paths)
+        self._populate_locations_with_keys(keys)
 
-    def add_paths(self, paths_list: List[Tuple[int, int, int]]) -> None:
-        for path in paths_list:
-            start_location, destination_location, travel_time = path
-            path_obj = Path(destination_location, travel_time)
-            self.locations[start_location].add_path(path_obj)
+    def _get_total_locations(self, paths: List[Tuple[int, int, int]]) -> int:
+        return max(max(paths, key=lambda x: max(x[0], x[1]))[:2]) + 1
 
-    def add_keys(self, keys_list: List[Tuple[int, int]]) -> None:
-        for key in keys_list:
-            location_id, monster_defeat_time = key
-            self.locations[location_id].add_key(monster_defeat_time)
+    def _populate_locations_with_paths(self, paths: List[Tuple[int, int, int]]) -> None:
+        for path in paths:
+            start_location_id, end_location_id, travel_time = path
+            path = Path(self.locations[start_location_id], self.locations[end_location_id], travel_time)
+            self.locations[start_location_id].paths.append(path)
 
-    def sort_locations(self) -> None:
-        self.locations.sort(key=lambda location: location.location_id)
+    def _populate_locations_with_keys(self, keys: List[Tuple[int, int]]) -> None:
+        for key in keys:
+            key_location_id, monster_defeat_time = key
+            self.locations[key_location_id].monster_defeat_time = monster_defeat_time
 
-    def __str__(self) -> str:
-        return '\n'.join(str(location) for location in self.locations)
-
-    def get_vertices_with_keys(self) -> List[Location]:
-        return [location for location in self.locations if location.monster_defeat_time > 0]
+    def __str__(self):
+        locations_str = '\n'.join([str(location) for location in self.locations])
+        return f"FloorMap:\n{locations_str}"
 
 if __name__ == "__main__":
     # The paths represented as a list of tuples
@@ -63,7 +54,4 @@ if __name__ == "__main__":
     # Creating a FloorGraph object based on the given paths
     myfloor = FloorGraph(paths, keys)
     print(myfloor)
-    print('testign function to get vertices with keys')
-    vertices_with_keys = myfloor.get_vertices_with_keys()
-    for vertex in vertices_with_keys:
-        print(vertex)
+
