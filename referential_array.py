@@ -21,7 +21,6 @@ from typing import TypeVar, Generic
 
 T = TypeVar('T')
 
-
 class ArrayR(Generic[T]):
     def __init__(self, length: int) -> None:
         """ Creates an array of references to objects of the given length
