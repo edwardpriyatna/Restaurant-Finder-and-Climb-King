@@ -1,102 +1,49 @@
+from typing import List, Tuple, Optional
 import heapq
 class Location:
-    def __init__(self, location_id):
-        self.id = location_id
-        self.paths = []  # List of Path objects
-        self.key = None  # Key object if a key is present
-        self.visited = False
-        self.discovered = False
-        self.time_to_reach = float('inf')  # Initialize with infinity
+    def __init__(self, id: int, monster_defeat_time: int = 0):
+        self.id = id
+        self.monster_defeat_time = monster_defeat_time
+        self.paths = []
 
     def __str__(self):
-        path_info = ", ".join([f"({path.destination}, Time: {path.time})" for path in self.paths])
-        if self.key:
-            key_info = f"Key at Location: {self.key.location_id} (Time to Pickup: {self.key.time_to_pickup})"
-        else:
-            key_info = "No Key"
-        return f"Location {self.id} - Paths: [{path_info}], {key_info}, Visited: {self.visited}, Discovered: {self.discovered}, Time to Reach: {self.time_to_reach}"
+        paths_str = ', '.join([str(path) for path in self.paths])
+        return f"Location(id={self.id}, monster_defeat_time={self.monster_defeat_time}, paths=[{paths_str}])"
 
 class Path:
-    def __init__(self, source, destination, time):
-        self.source = source
-        self.destination = destination
-        self.time = time
+    def __init__(self, start_location: Location, end_location: Location, travel_time: int):
+        self.start_location = start_location
+        self.end_location = end_location
+        self.travel_time = travel_time
 
     def __str__(self):
-        return f"Path from {self.source} to {self.destination} (Time: {self.time})"
-
-class Key:
-    def __init__(self, location_id, time_to_pickup):
-        self.location_id = location_id
-        self.time_to_pickup = time_to_pickup
-
-    def __str__(self):
-        return f"Key at Location {self.location_id} (Time to Pickup: {self.time_to_pickup})"
-
+        return f"Path(end_location={self.end_location.id}, travel_time={self.travel_time})"
 
 class FloorGraph:
-    def __init__(self, paths, keys):
-        self.locations = []  # List of Location objects
-        self.exits = []  # List of exit location IDs
-        self.start = None  # Start location object
-        self.construct_graph(paths, keys)
+    def __init__(self, paths: List[Tuple[int, int, int]], keys: List[Tuple[int, int]]):
+        self.total_locations = self._get_total_locations(paths)
+        self.locations = [Location(i) for i in range(self.total_locations)]
+        self._populate_locations_with_paths(paths)
+        self._populate_locations_with_keys(keys)
 
-    def construct_graph(self, paths, keys):
-        # Collect unique location IDs from paths and keys
-        unique_location_ids = set()
-        for u, v, _ in paths:
-            unique_location_ids.add(u)
-            unique_location_ids.add(v)
-        for k, _ in keys:
-            unique_location_ids.add(k)
+    def _get_total_locations(self, paths: List[Tuple[int, int, int]]) -> int:
+        return max(max(paths, key=lambda x: max(x[0], x[1]))[:2]) + 1
 
-        # Initialize Location objects
-        for location_id in unique_location_ids:
-            self.locations.append(Location(location_id))
+    def _populate_locations_with_paths(self, paths: List[Tuple[int, int, int]]) -> None:
+        for path in paths:
+            start_location_id, end_location_id, travel_time = path
+            path = Path(self.locations[start_location_id], self.locations[end_location_id], travel_time)
+            self.locations[start_location_id].paths.append(path)
 
-        # Add paths to Location objects
-        for u, v, x in paths:
-            self.locations[u].paths.append(Path(u, v, x))
-
-        # Add keys to Location objects
-        for k, y in keys:
-            self.locations[k].key = Key(k, y)
+    def _populate_locations_with_keys(self, keys: List[Tuple[int, int]]) -> None:
+        for key in keys:
+            key_location_id, monster_defeat_time = key
+            self.locations[key_location_id].monster_defeat_time = monster_defeat_time
 
     def __str__(self):
-        return "\n".join([str(location) for location in self.locations])
+        locations_str = '\n'.join([str(location) for location in self.locations])
+        return f"FloorMap:\n{locations_str}"
 
-    def run_dijkstra_original(self, start):
-        # Initialize priority queue (heap) for Dijkstra's algorithm
-        priority_queue = [(0, start)]
-        heapq.heapify(priority_queue)
-
-        # Initialize the start location's time to reach as 0
-        self.locations[start].time_to_reach = 0
-
-        while priority_queue:
-            # Get the location with the minimum time_to_reach value
-            current_time, current_location = heapq.heappop(priority_queue)
-
-            # If the current_time is greater than the recorded time_to_reach, skip
-            if current_time > self.locations[current_location].time_to_reach:
-                continue
-
-            # Iterate through paths from the current location
-            for path in self.locations[current_location].paths:
-                next_location = path.destination
-                next_time = current_time + path.time
-
-                # If the new time is shorter, update the time_to_reach for the next_location
-                if next_time < self.locations[next_location].time_to_reach:
-                    self.locations[next_location].time_to_reach = next_time
-                    # Add the next_location to the priority queue
-                    heapq.heappush(priority_queue, (next_time, next_location))
-
-    def reset_time_to_reach(self):
-        # Reset time_to_reach to infinity for all locations except the start
-        for location in self.locations:
-            if location != self.start:
-                location.time_to_reach = float('inf')
 
 if __name__ == "__main__":
     # The paths represented as a list of tuples
@@ -107,9 +54,6 @@ if __name__ == "__main__":
     keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
     # Creating a FloorGraph object based on the given paths
     myfloor = FloorGraph(paths, keys)
-    print(myfloor)
-    myfloor.run_dijkstra_original(1)
-    print('after')
     print(myfloor)
 
 
