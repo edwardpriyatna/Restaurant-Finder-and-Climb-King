@@ -7,8 +7,6 @@ class Location:
         self.monster_defeat_time = monster_defeat_time
         self.paths = []
         self.has_key = has_key
-        self.visited = False
-        self.discovered = False
 
     def add_path(self, destination, travel_time):
         self.paths.append(Path(self, destination, travel_time))
@@ -48,59 +46,45 @@ class FloorGraph:
             self.locations[key_location_id].has_key = True
             self.locations[key_location_id].monster_defeat_time = monster_defeat_time
 
-    def __str__(self):
-        locations_str = '\n'.join([str(location) for location in self.locations])
-        return f"FloorMap:\n{locations_str}"
-
-    def _sort_exits(self, exits):
-        return sorted(exits)
-
-    def _binary_search(self, exits, target):
-        left, right = 0, len(exits) - 1
-        while left <= right:
-            mid = left + (right - left) // 2
-            if exits[mid] == target:
-                return mid
-            elif exits[mid] < target:
-                left = mid + 1
-            else:
-                right = mid - 1
-        return -1
-
     def climb(self, start, exits):
-        exits = self._sort_exits(exits)
-        min_heap = [(0, start, False, [])]  # (total_time, current_location, found_key, path)
+        exit_locations = set(exits)
+        min_heap = [(0, start, set(), [start])]  # (total_time, current_location, collected_keys, path)
 
         while min_heap:
-            total_time, current_location, found_key, path = heapq.heappop(min_heap)
+            total_time, current_location, collected_keys, path = heapq.heappop(min_heap)
 
-            if self.locations[current_location].visited:
-                continue
-
-            self.locations[current_location].visited = True
-            path.append(current_location)
-
-            if current_location in exits and found_key:
-                exit_index = self._binary_search(exits, current_location)
-                if exit_index != -1:
-                    return total_time, path  # Found an exit with a key
+            if current_location in exit_locations:
+                return total_time, path
 
             for path_obj in self.locations[current_location].paths:
                 next_location = path_obj.end_location
                 travel_time = path_obj.travel_time
 
-                if not found_key and next_location.has_key and not next_location.discovered:
-                    # Collecting the key is optional, so we explore both options
-                    heapq.heappush(min_heap, (total_time + travel_time, next_location.id, True, list(path)))
-
-                if not next_location.visited:
-                    heapq.heappush(min_heap, (total_time + travel_time, next_location.id, found_key, list(path)))
-                    next_location.discovered = True
+                if next_location.id not in collected_keys:
+                    next_keys = set(collected_keys)
+                    if next_location.has_key:
+                        next_keys.add(next_location.id)
+                        heapq.heappush(min_heap, (total_time + travel_time + next_location.monster_defeat_time, next_location.id, next_keys, path + [next_location.id]))
+                    else:
+                        heapq.heappush(min_heap, (total_time + travel_time, next_location.id, next_keys, path + [next_location.id]))
 
         return None  # No valid route found
 
+if __name__ == "__main__":
+    # Create a FloorGraph object and perform the climb operation
+    paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2), (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4), (7, 8, 2), (8, 7, 2), (7, 3, 2), (8, 0, 11), (4, 3, 1), (4, 8, 10)]
+    keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
+    myfloor = FloorGraph(paths, keys)
 
-
+    start = 1
+    exits = [7, 2, 4]
+    result = myfloor.climb(start, exits)
+    if result:
+        total_time, path = result
+        print(f"Total Time: {total_time}")
+        print(f"Path: {path}")
+    else:
+        print("No valid route found")
 
 if __name__ == "__main__":
     # The paths represented as a list of tuples
