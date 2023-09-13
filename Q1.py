@@ -3,11 +3,12 @@ from typing import List, Tuple
 def restaurantFinder(min_distance: int, site_revenues: List[int]) -> Tuple[int, List[int]]:
     num_sites = len(site_revenues)
     max_revenue = [0]*num_sites
+    prev_site = [0]*num_sites
     chosen_sites = [0]*num_sites
 
     # Initialize base cases
-    max_revenue[0] = site_revenues[0]
-    chosen_sites[0] = [0]
+    max_revenue[0] = site_revenues[0] if site_revenues[0] > 0 else 0
+    chosen_sites[0] = [0] if site_revenues[0] > 0 else []
 
     for i in range(1, num_sites):
         # If no restaurant within min_distance km, consider the current site
