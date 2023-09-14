@@ -108,6 +108,16 @@ class Graph:
         # Replace the original list of vertices with the new one
         self.vertices = flipped_vertices
 
+    def add_new_location(self, exits):
+        # Create a new vertex and add it to the list of vertices
+        new_vertex = Vertex(len(self.vertices))
+        self.vertices.append(new_vertex)
+
+        # Connect all exits to the new vertex with an edge of weight 0
+        for exit in exits:
+            exit_edge = Edge(new_vertex, 0)
+            self.vertices[exit].edges.append(exit_edge)
+
     def __str__(self):
         return "\n".join(str(vertex) for vertex in self.vertices)
 
@@ -123,4 +133,7 @@ if __name__ == "__main__":
     print(myfloor.get_shortest_path(2,1))
     myfloor.reset()
     myfloor.flip_graph()
+    print(myfloor)
+    print('adding new location')
+    myfloor.add_new_location([1,0])
     print(myfloor)
