@@ -278,7 +278,7 @@ class FloorGraph:
         None
 
         :Output, return or postcondition:
-        None
+        All the paths are now flipped.
 
         :Time complexity:
         O(|V| + |E|), where |V| is the number of locations and |E| is the number of paths in the graph.
@@ -301,19 +301,19 @@ class FloorGraph:
     def add_new_location(self, exits: List[int]):
         """
         Function description:
-        Add a new Location to the graph connected to exit Locations.
+        Adds a new location that is connected to all exits by paths with travel_time 0.
 
         :Input:
-        argv1: List[int] - list of indices of exit Locations
+        Exits: List[int], list of exit Locations indexes
 
         :Output, return or postcondition:
-        None
+        Adds a new location that is connected to all exits by paths with travel_time 0.
 
         :Time complexity:
-        O(E), where E is the number of exits
+        O(n), where n is the number of elements in the exits list. For each exit, it performs an operation.
 
         :Aux space complexity:
-        O(E)
+        O(n), where n is the number of elements in the exits list. Creates a new Path instance for each exit_location.
         """
         new_location = Location(len(self.locations))
         self.locations.append(new_location)
@@ -325,19 +325,22 @@ class FloorGraph:
     def get_minimum_distance_to_key(self, start: int):
         """
         Function description:
-        Calculate the minimum distance to reach each key from a given starting key.
+        Calculate the minimum distance to reach each key from a given start location.
 
         :Input:
-        argv1: int - index of the starting key
+        start: int - index of the starting location
 
         :Output, return or postcondition:
-        None
+        Update the time to reach for each key based on the time to reach the location where the key is at.
 
         :Time complexity:
-        O(N * log(N) + M), where N is the number of locations and M is the total number of paths
+        O((|E|+|V|) log |V|), originally O((|E|+|V|) log |V| + |K|), where |E| is the number of edges,
+        |V| is the number of vertices, and |K| is the number of keys. This is because it runs Dijkstra’s algorithm,
+        which has a time complexity of O((|E|+|V|) log |V|), and then updates the time to reach each key,
+        which takes O(|K|) time. But key is not counted in complexity so it's O((|E|+|V|) log |V|).
 
         :Aux space complexity:
-        O(N)
+        O(|V|), as it needs to store the vertices in the priority queue for Dijkstra’s algorithm.
         """
         self.dijkstra(self.locations[start])
 
@@ -357,10 +360,10 @@ class FloorGraph:
         Key - the Key object with the minimum time_to_reach_key + y
 
         :Time complexity:
-        O(K), where K is the number of keys
+        O(1), originally O(|K|). Where K is the number of keys, but keys aren't counted for complexity.
 
         :Aux space complexity:
-        O(1)
+        O(1), does not use any additional space.
         """
         return min(self.keys, key=lambda key: key.time_to_reach_key + key.y)
 
