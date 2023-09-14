@@ -126,8 +126,8 @@ class Graph:
         self.vertices.append(new_vertex)
 
         # Connect the new vertex to all exits with an edge of weight 0
-        for exit in exits:
-            exit_edge = Edge(self.vertices[exit], 0)
+        for exit_vertex in exits:
+            exit_edge = Edge(self.vertices[exit_vertex], 0)
             new_vertex.edges.append(exit_edge)
 
     def get_minimum_distance_to_weight(self, start):
@@ -144,47 +144,23 @@ class Graph:
 
     def get_minimum_weight(self):
         return min(self.weights, key=lambda weight: weight.distance_to_reach + weight.distance_to_get)
-    def get_minimum_weighted_vertice(self, start_vertex_index):
-        start_vertex = self.vertices[start_vertex_index]
-        self.dijkstra(start_vertex)
 
-        min_weighted_vertex = None
-        for vertex in self.vertices:
-            if vertex.weight != 0 and (
-                    min_weighted_vertex is None or vertex.time_to_reach + vertex.weight < min_weighted_vertex.time_to_reach + min_weighted_vertex.weight):
-                min_weighted_vertex = vertex
+    def find_vertex_to_grab_weight(self,start,exits):
+        self.get_minimum_distance_to_weight(start)
+        self.reset()
+        self.flip_graph()
+        self.add_new_location(exits)
+        self.get_minimum_distance_to_weight(len(self.vertices)-1)
+        self.flip_graph()
+        self.reset()
+        return myfloor.get_minimum_weight()
 
-        if min_weighted_vertex is None:
-            return None
+    def climb(self,start,exits):
+        vertex_to_grab_weight_index=self.find_vertex_to_grab_weight(start,exits).vertex_index
+        print(self.get_shortest_path(start,vertex_to_grab_weight_index))
+        self.reset()
+        print(self.get_shortest_path(vertex_to_grab_weight_index,len(self.vertices)-1))
 
-        path = []
-        current_vertex = min_weighted_vertex
-
-        while current_vertex is not None:
-            path.append(current_vertex.name)
-            current_vertex = current_vertex.previous_vertex
-
-        path.reverse()
-        return min_weighted_vertex.name, min_weighted_vertex.time_to_reach, path, min_weighted_vertex.weight
-
-    def get_shortest_path_all_weighted_vertices(self, start_vertex_index):
-        start_vertex = self.vertices[start_vertex_index]
-        self.dijkstra(start_vertex)
-        shortest_paths = []
-
-        for vertex in self.vertices:
-            if vertex.weight != 0 and vertex.time_to_reach != float('inf'):
-                path = []
-                current_vertex = vertex
-
-                while current_vertex is not None:
-                    path.append(current_vertex.name)
-                    current_vertex = current_vertex.previous_vertex
-
-                path.reverse()
-                shortest_paths.append((vertex.name,vertex.time_to_reach, path, vertex.weight))
-
-        return shortest_paths
     def __str__(self):
         return "\n".join(str(vertex) for vertex in self.vertices)
 
@@ -198,10 +174,7 @@ if __name__ == "__main__":
     keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
     # Creating a FloorGraph object based on the given paths
     myfloor = Graph(paths, keys)
-    myfloor.get_minimum_distance_to_weight(1)
-    myfloor.reset()
-    myfloor.flip_graph()
-    myfloor.add_new_location([7,2,4])
-    myfloor.get_minimum_distance_to_weight(9)
-    print(myfloor.get_minimum_weight())
+    start = 3
+    exits = [4]
+    myfloor.climb(start,exits)
 
