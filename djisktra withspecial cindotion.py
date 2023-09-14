@@ -140,18 +140,36 @@ class Graph:
 
         path.reverse()
         return min_weighted_vertex.name, min_weighted_vertex.time_to_reach, path, min_weighted_vertex.weight
+
+    def get_shortest_path_all_weighted_vertices(self, start_vertex_index):
+        start_vertex = self.vertices[start_vertex_index]
+        self.dijkstra(start_vertex)
+
+        shortest_paths = []
+        for vertex in self.vertices:
+            if vertex.weight != 0 and vertex.time_to_reach != float('inf'):
+                path = []
+                current_vertex = vertex
+
+                while current_vertex is not None:
+                    path.append(current_vertex.name)
+                    current_vertex = current_vertex.previous_vertex
+
+                path.reverse()
+                shortest_paths.append((vertex.time_to_reach, path, vertex.weight))
+
+        return shortest_paths
     def __str__(self):
         return "\n".join(str(vertex) for vertex in self.vertices)
 
 if __name__ == "__main__":
-    # The edges represented as a list of tuples
-    edges = [(0, 1, 4), (0, 3, 2), (0, 2, 3), (2, 3, 2), (3, 0, 3)]
-    # The weigted vertices represented as a list of tuples
-    weights = [(0, 5), (3, 2), (1, 3)]
-
-    # Creating a Graph object and constructing the graph based on the given edges and weights
-    myfloor = Graph(edges,weights)
-    print(myfloor.get_minimum_weighted_vertice(3))
-    myfloor.reset()
-    myfloor.add_new_location([2,1])
-    print(myfloor)
+    # Example 1
+    # The paths represented as a list of tuples
+    paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2),
+             (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4), (7, 8, 2),
+             (8, 7, 2), (7, 3, 2), (8, 0, 11), (4, 3, 1), (4, 8, 10)]
+    # The keys represented as a list of tuples
+    keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
+    # Creating a FloorGraph object based on the given paths
+    myfloor = Graph(paths, keys)
+    print(myfloor.get_shortest_path_all_weighted_vertices(1))
