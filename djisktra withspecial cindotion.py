@@ -94,6 +94,20 @@ class Graph:
             vertex.time_to_reach = float('inf')
             vertex.previous_vertex = None
 
+    def flip_graph(self):
+        # Create a new list of vertices with the same names but no edges
+        flipped_vertices = [Vertex(i) for i in range(len(self.vertices))]
+
+        # Iterate over the original vertices and their edges
+        for vertex in self.vertices:
+            for edge in vertex.edges:
+                # Add a new edge with reversed direction to the corresponding vertex in the new list
+                flipped_edge = Edge(flipped_vertices[vertex.name], edge.weight)
+                flipped_vertices[edge.to_vertex.name].edges.append(flipped_edge)
+
+        # Replace the original list of vertices with the new one
+        self.vertices = flipped_vertices
+
     def __str__(self):
         return "\n".join(str(vertex) for vertex in self.vertices)
 
@@ -108,6 +122,5 @@ if __name__ == "__main__":
     print(myfloor)
     print(myfloor.get_shortest_path(2,1))
     myfloor.reset()
-    print(myfloor.get_shortest_path(1,2))
-    myfloor.reset()
-    print(myfloor.get_shortest_path(3, 2))
+    myfloor.flip_graph()
+    print(myfloor)
