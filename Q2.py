@@ -156,10 +156,16 @@ class Graph:
         return myfloor.get_minimum_weight()
 
     def climb(self,start,exits):
-        vertex_to_grab_weight_index=self.find_vertex_to_grab_weight(start,exits).vertex_index
-        print(self.get_shortest_path(start,vertex_to_grab_weight_index))
+        vertex_to_grab_weight=self.find_vertex_to_grab_weight(start,exits)
+        print(vertex_to_grab_weight.distance_to_reach+ vertex_to_grab_weight.distance_to_get)
+        print(self.get_shortest_path(start,vertex_to_grab_weight.vertex_index))
         self.reset()
-        print(self.get_shortest_path(vertex_to_grab_weight_index,len(self.vertices)-1))
+        print(self.get_shortest_path(vertex_to_grab_weight.vertex_index,len(self.vertices)-1))
+        self.reset_weights()
+
+    def reset_weights(self):
+        for weight in self.weights:
+            weight.distance_to_reach = 0
 
     def __str__(self):
         return "\n".join(str(vertex) for vertex in self.vertices)
