@@ -373,17 +373,25 @@ class FloorGraph:
     def find_location_to_grab_key(self, start: int, exits: List[int]) -> 'Key':
         """
         Function description:
-        Find the Location to grab a key to minimize time.
+        Find the Location to grab a key to minimize time. First I'm going to get the minimum distance of each key from a start
+        location. Then I would add the time_to_reach of each location to the corresponding key. I then reset the graph because
+        the time_to_reach for each location has been changed by the Djikstra's. Then I flip the graph and create a new location
+        that is connected to all exits with an edge of weight 0. Now I'm going to get the minimum distance of each key from the new location.
+        Then I would add the time_to_reach of each location from the new location
+        to the corresponding key.
 
         :Input:
-        argv1: int - index of the starting key
-        argv2: List[int] - list of indices of exit Locations
+        start: int - index of the starting key
+        exits: List[int] - list of indices of exit Locations
 
         :Output, return or postcondition:
         Key - the Key object representing the optimal location to grab a key
 
         :Time complexity:
-        O(N * log(N) + M), where N is the number of locations and M is the total number of paths
+        Time Complexity: O((|E|+|V|) log |V|), O((|E|+|V|) log |V| + |K|), where |E| is the number of edges, |V| is the
+        number of vertices, and |K| is the number of keys. This is because it runs Dijkstra’s algorithm twice,
+        which has a time complexity  of O((|E|+|V|) log |V|) each time, and then finds the minimum key, which takes O(K) time.
+        But there are at most |V| keys so the complexity becomes O((|E|+|V|) log |V|)
 
         :Aux space complexity:
         O(N + E), where E is the number of exits
