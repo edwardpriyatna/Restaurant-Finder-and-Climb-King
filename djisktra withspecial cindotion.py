@@ -62,18 +62,21 @@ if __name__ == "__main__":
     C = Vertex('C')
     D = Vertex('D')
     E = Vertex('E')
+    F = Vertex('F')
+    G = Vertex('G')
 
     # Create edges
-    A.edges.append(Edge(B, 0))
-    B.edges.append(Edge(A, 1))
-    A.edges.append(Edge(C, 3))
-    C.edges.append(Edge(A, 2))
-    B.edges.append(Edge(D, 1))
-
-    C.edges.append(Edge(E, 4))
-    E.edges.append(Edge(C, 1))
-    D.edges.append(Edge(C, 1))
-
+    A.edges.append(Edge(B, 4))
+    B.edges.append(Edge(A, 3))  # Bidirectional edge
+    A.edges.append(Edge(C, 3))  # Unidirectional edge
+    A.edges.append(Edge(D, 3))  # Unidirectional edge
+    B.edges.append(Edge(E, 4))  # Unidirectional edge
+    C.edges.append(Edge(F, 2))
+    F.edges.append(Edge(C, 2))  # Bidirectional edge
+    D.edges.append(Edge(G, 1))  # Unidirectional edge
+    E.edges.append(Edge(G, 3))  # Unidirectional edge
+    F.edges.append(Edge(G, 1))
+    G.edges.append(Edge(F, 2))  # Bidirectional edge
 
     # Create graph and add vertices
     graph = Graph()
@@ -82,7 +85,9 @@ if __name__ == "__main__":
     graph.add_vertex(C)
     graph.add_vertex(D)
     graph.add_vertex(E)
+    graph.add_vertex(F)
+    graph.add_vertex(G)
 
-    # Get shortest path from A to E
-    distance, path = graph.get_shortest_path(B, E)
-    print(f"The shortest path from A to E is {path} with a total weight of {distance}")
+    # Get shortest path from A to G
+    distance, path = graph.get_shortest_path(B, G)
+    print(f"The shortest path from B to G is {path} with a total weight of {distance}")
