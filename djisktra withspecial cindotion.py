@@ -118,6 +118,24 @@ class Graph:
             exit_edge = Edge(new_vertex, 0)
             self.vertices[exit].edges.append(exit_edge)
 
+    def get_minimum_weighted_vertice(self, start_vertex_index):
+        start_vertex = self.vertices[start_vertex_index]
+        self.dijkstra(start_vertex)
+
+        # Exclude vertices with a weight of 0
+        weighted_vertices = [vertex for vertex in self.vertices if vertex.weight != 0]
+
+        min_weighted_vertex = min(weighted_vertices, key=lambda vertex: vertex.time_to_reach + vertex.weight)
+
+        path = []
+        current_vertex = min_weighted_vertex
+
+        while current_vertex is not None:
+            path.append(current_vertex.name)
+            current_vertex = current_vertex.previous_vertex
+
+        path.reverse()
+        return min_weighted_vertex.name, min_weighted_vertex.time_to_reach, path, min_weighted_vertex.weight
     def __str__(self):
         return "\n".join(str(vertex) for vertex in self.vertices)
 
@@ -129,11 +147,4 @@ if __name__ == "__main__":
 
     # Creating a Graph object and constructing the graph based on the given edges and weights
     myfloor = Graph(edges,weights)
-    print(myfloor)
-    print(myfloor.get_shortest_path(2,1))
-    myfloor.reset()
-    myfloor.flip_graph()
-    print(myfloor)
-    print('adding new location')
-    myfloor.add_new_location([1,0])
-    print(myfloor)
+    print(myfloor.get_minimum_weighted_vertice(2))
