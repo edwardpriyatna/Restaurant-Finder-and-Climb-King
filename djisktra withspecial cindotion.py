@@ -6,7 +6,6 @@ class Vertex:
         self.visited = False
         self.discovered = False
         self.time_to_reach = float('inf')
-        self.time_to_reach_and_weight = float('inf')
         self.edges = []
         self.previous_vertex = None
         self.weight = weight
@@ -17,8 +16,7 @@ class Vertex:
     def __str__(self):
         return f"Vertex {self.name}, weight {self.weight}, visited {self.visited}, discovered {self.discovered}, " \
                f"time_to_reach {self.time_to_reach}, edges {[str(edge) for edge in self.edges]}, " \
-               f"previous_vertex {self.previous_vertex.name if self.previous_vertex else None}, time_to_reach_and_weight:" \
-               f"{self.time_to_reach_and_weight}"
+               f"previous_vertex {self.previous_vertex.name if self.previous_vertex else None}"
 
 class Edge:
     def __init__(self, to_vertex, weight):
@@ -53,8 +51,6 @@ class Graph:
     def dijkstra(self, start_vertex):
         queue = []
         start_vertex.time_to_reach = 0
-        if start_vertex.weight > 0:
-            start_vertex.time_to_reach_and_weight = start_vertex.weight
         heapq.heappush(queue, start_vertex)
 
         while queue:
@@ -69,8 +65,6 @@ class Graph:
                 tentative_distance = current_vertex.time_to_reach + edge.weight
                 if tentative_distance < edge.to_vertex.time_to_reach:
                     edge.to_vertex.time_to_reach = tentative_distance
-                    if edge.to_vertex.weight > 0:
-                        edge.to_vertex.time_to_reach_and_weight = tentative_distance + edge.to_vertex.weight
                     edge.to_vertex.discovered = True
                     edge.to_vertex.previous_vertex = current_vertex
                     heapq.heappush(queue, edge.to_vertex)
@@ -128,21 +122,20 @@ class Graph:
         start_vertex = self.vertices[start_vertex_index]
         self.dijkstra(start_vertex)
 
-        min_weight_vertex = min((vertex for vertex in self.vertices if vertex.discovered),
-                                key=lambda vertex: vertex.time_to_reach_and_weight, default=None)
+        # Exclude vertices with a weight of 0
+        weighted_vertices = [vertex for vertex in self.vertices if vertex.weight != 0]
 
-        if min_weight_vertex is None:
-            return None
+        min_weighted_vertex = min(weighted_vertices, key=lambda vertex: vertex.time_to_reach + vertex.weight)
 
         path = []
-        current_vertex = min_weight_vertex
+        current_vertex = min_weighted_vertex
 
         while current_vertex is not None:
             path.append(current_vertex.name)
             current_vertex = current_vertex.previous_vertex
 
         path.reverse()
-        return min_weight_vertex.name, min_weight_vertex.time_to_reach, path, min_weight_vertex.weight
+        return min_weighted_vertex.name, min_weighted_vertex.time_to_reach, path, min_weighted_vertex.weight
     def __str__(self):
         return "\n".join(str(vertex) for vertex in self.vertices)
 
@@ -154,7 +147,4 @@ if __name__ == "__main__":
 
     # Creating a Graph object and constructing the graph based on the given edges and weights
     myfloor = Graph(edges,weights)
-    print(myfloor.get_shortest_path(2,2))
-    print(myfloor)
-    myfloor.reset()
-    print(myfloor.get_minimum_weighted_vertice(0))
+    print(myfloor.get_minimum_weighted_vertice(3))
