@@ -1,191 +1,188 @@
 import heapq
 
-class Vertex:
-    def __init__(self, name, weight=0):
+class Location:
+    def __init__(self, name):
         self.name = name
         self.visited = False
         self.discovered = False
         self.time_to_reach = float('inf')
-        self.edges = []
-        self.previous_vertex = None
-        self.weight = weight
+        self.paths = []
+        self.previous_location = None
 
     def __lt__(self, other):
         return self.time_to_reach < other.time_to_reach
 
     def __str__(self):
-        return f"Vertex {self.name}, weight {self.weight}, visited {self.visited}, discovered {self.discovered}, " \
-               f"time_to_reach {self.time_to_reach}, edges {[str(edge) for edge in self.edges]}, " \
-               f"previous_vertex {self.previous_vertex.name if self.previous_vertex else None}"
+        return f"Vertex {self.name}, visited {self.visited}, discovered {self.discovered}, " \
+               f"time_to_reach {self.time_to_reach}, edges {[str(path) for path in self.paths]}, " \
+               f"previous_vertex {self.previous_location.name if self.previous_location else None}"
 
-class Edge:
-    def __init__(self, to_vertex, weight):
-        self.to_vertex = to_vertex
-        self.weight = weight
-
-    def __str__(self):
-        return f"Edge to {self.to_vertex.name}, weight {self.weight}"
-
-class Weight:
-    def __init__(self, vertex_index, distance_to_get):
-        self.vertex_index = vertex_index
-        self.distance_to_reach = 0
-        self.distance_to_get = distance_to_get
+class Path:
+    def __init__(self, to_location, travel_time):
+        self.to_location = to_location
+        self.travel_time = travel_time
 
     def __str__(self):
-        return f"Weight of vertex {self.vertex_index} with distance to reach {self.distance_to_reach} " \
-               f"and distance to get {self.distance_to_get}"
+        return f"Edge to {self.to_location.name}, weight {self.travel_time}"
+
+class Key:
+    def __init__(self, location_index, time_to_fight):
+        self.location_index = location_index
+        self.time_to_reach_key = 0
+        self.time_to_fight = time_to_fight
+
+    def __str__(self):
+        return f"Weight of vertex {self.location_index} with distance to reach {self.time_to_reach_key} " \
+               f"and distance to get {self.time_to_fight}"
 
 class FloorGraph:
-    def __init__(self, edges, weights):
-        self.vertices = []
-        self.weights = []
-        self.construct_graph(edges, weights)
+    def __init__(self, paths, keys):
+        self.locations = []
+        self.keys = []
+        self.construct_graph(paths, keys)
 
-    def add_vertex(self, vertex):
-        self.vertices.append(vertex)
+    def add_location(self, location):
+        self.locations.append(location)
 
-    def add_weight(self, weight):
-        self.weights.append(weight)
+    def add_key(self, key):
+        self.keys.append(key)
 
-    def add_edge(self, from_vertex_index, to_vertex_index, weight):
-        edge_instance = Edge(self.vertices[to_vertex_index], weight)
-        self.vertices[from_vertex_index].edges.append(edge_instance)
+    def add_path(self, from_location_index, to_location_index, travel_time):
+        path_instance = Path(self.locations[to_location_index], travel_time)
+        self.locations[from_location_index].paths.append(path_instance)
 
-    def construct_graph(self, edges, weights):
-        for i in range(max(max(edges, key=lambda x: max(x[:2]))[:2]) + 1):
-            self.add_vertex(Vertex(i))
+    def construct_graph(self, paths, keys):
+        for i in range(max(max(paths, key=lambda x: max(x[:2]))[:2]) + 1):
+            self.add_location(Location(i))
 
-        for weight in weights:
-            self.add_weight(Weight(weight[0], weight[1]))
+        for key in keys:
+            self.add_key(Key(key[0], key[1]))
 
-        for edge in edges:
-            self.add_edge(*edge)
+        for path in paths:
+            self.add_path(*path)
 
-    def dijkstra(self, start_vertex):
+    def dijkstra(self, start_location):
         queue = []
-        start_vertex.time_to_reach = 0
-        heapq.heappush(queue, start_vertex)
+        start_location.time_to_reach = 0
+        heapq.heappush(queue, start_location)
 
         while queue:
-            current_vertex = heapq.heappop(queue)
+            current_location = heapq.heappop(queue)
 
-            if current_vertex.visited:
+            if current_location.visited:
                 continue
 
-            current_vertex.visited = True
+            current_location.visited = True
 
-            for edge in current_vertex.edges:
-                tentative_distance = current_vertex.time_to_reach + edge.weight
-                if tentative_distance < edge.to_vertex.time_to_reach:
-                    edge.to_vertex.time_to_reach = tentative_distance
-                    edge.to_vertex.discovered = True
-                    edge.to_vertex.previous_vertex = current_vertex
-                    heapq.heappush(queue, edge.to_vertex)
+            for path in current_location.paths:
+                tentative_distance = current_location.time_to_reach + path.travel_time
+                if tentative_distance < path.to_location.time_to_reach:
+                    path.to_location.time_to_reach = tentative_distance
+                    path.to_location.discovered = True
+                    path.to_location.previous_location = current_location
+                    heapq.heappush(queue, path.to_location)
 
-    def get_shortest_path(self, start_vertex_index, end_vertex_index):
-        start_vertex = self.vertices[start_vertex_index]
-        end_vertex = self.vertices[end_vertex_index]
-        self.dijkstra(start_vertex)
+    def get_shortest_path(self, start_location_index, end_location_index):
+        start_location = self.locations[start_location_index]
+        end_location = self.locations[end_location_index]
+        self.dijkstra(start_location)
 
-        if end_vertex.time_to_reach == float('inf'):
+        if end_location.time_to_reach == float('inf'):
             return None
 
         path = []
-        current_vertex = end_vertex
+        current_location = end_location
 
-        while current_vertex is not None:
-            path.insert(0, current_vertex.name)
-            current_vertex = current_vertex.previous_vertex
+        while current_location is not None:
+            path.insert(0, current_location.name)
+            current_location = current_location.previous_location
 
         return path
 
     def reset(self):
-        for vertex in self.vertices:
-            vertex.visited = False
-            vertex.discovered = False
-            vertex.time_to_reach = float('inf')
-            vertex.previous_vertex = None
+        for location in self.locations:
+            location.visited = False
+            location.discovered = False
+            location.time_to_reach = float('inf')
+            location.previous_location = None
 
     def flip_graph(self):
         # Create a new list of vertices with the same names but no edges
-        flipped_vertices = [Vertex(i, self.vertices[i].weight) for i in range(len(self.vertices))]
+        flipped_locations = [Location(i) for i in range(len(self.locations))]
 
         # Iterate over the original vertices and their edges
-        for vertex in self.vertices:
-            for edge in vertex.edges:
+        for location in self.locations:
+            for path in location.paths:
                 # Add a new edge with reversed direction to the corresponding vertex in the new list
-                flipped_edge = Edge(flipped_vertices[vertex.name], edge.weight)
-                flipped_vertices[edge.to_vertex.name].edges.append(flipped_edge)
+                flipped_path = Path(flipped_locations[location.name], path.travel_time)
+                flipped_locations[path.to_location.name].paths.append(flipped_path)
 
         # Replace the original list of vertices with the new one
-        self.vertices = flipped_vertices
+        self.locations = flipped_locations
     def add_new_location(self, exits):
         # Create a new vertex and add it to the list of vertices
-        new_vertex = Vertex(len(self.vertices))
-        self.vertices.append(new_vertex)
+        new_location = Location(len(self.locations))
+        self.locations.append(new_location)
 
         # Connect the new vertex to all exits with an edge of weight 0
-        for exit_vertex in exits:
-            exit_edge = Edge(self.vertices[exit_vertex], 0)
-            new_vertex.edges.append(exit_edge)
+        for exit_location in exits:
+            exit_path = Path(self.locations[exit_location], 0)
+            new_location.paths.append(exit_path)
 
-    def get_minimum_distance_to_weight(self, start):
+    def get_minimum_distance_to_key(self, start):
 
         # Run Dijkstra's algorithm from the start vertex
-        self.dijkstra(self.vertices[start])
+        self.dijkstra(self.locations[start])
 
         # Update the distance_to_reach of each weight
-        for weight in self.weights:
-            vertex = self.vertices[weight.vertex_index]
-            weight.distance_to_reach += vertex.time_to_reach
+        for key in self.keys:
+            location = self.locations[key.location_index]
+            key.time_to_reach_key += location.time_to_reach
 
-        return self.weights
+    def get_minimum_key(self):
+        return min(self.keys, key=lambda key: key.time_to_reach_key + key.time_to_fight)
 
-    def get_minimum_weight(self):
-        return min(self.weights, key=lambda weight: weight.distance_to_reach + weight.distance_to_get)
-
-    def find_vertex_to_grab_weight(self,start,exits):
-        self.get_minimum_distance_to_weight(start)
+    def find_location_to_grab_key(self,start,exits):
+        self.get_minimum_distance_to_key(start)
         self.reset()
         self.flip_graph()
         self.add_new_location(exits)
-        self.get_minimum_distance_to_weight(len(self.vertices)-1)
+        self.get_minimum_distance_to_key(len(self.locations)-1)
         self.flip_graph()
         self.reset()
-        return self.get_minimum_weight()
+        return self.get_minimum_key()
 
     def climb(self,start,exits):
-        vertex_to_grab_weight=self.find_vertex_to_grab_weight(start,exits)
-        sequence_part1=self.get_shortest_path(start,vertex_to_grab_weight.vertex_index)
+        location_to_grab_key=self.find_location_to_grab_key(start,exits)
+        sequence_part1=self.get_shortest_path(start,location_to_grab_key.location_index)
         if sequence_part1 is None:
             return None
         sequence_part1.pop()
 
         self.reset()
-        sequence_part2=self.get_shortest_path(vertex_to_grab_weight.vertex_index,len(self.vertices)-1)
+        sequence_part2=self.get_shortest_path(location_to_grab_key.location_index,len(self.locations)-1)
         sequence_part2.pop()
 
-        return_tuple=(vertex_to_grab_weight.distance_to_reach+ vertex_to_grab_weight.distance_to_get, sequence_part1+sequence_part2)
-        self.reset_weights()
+        return_tuple=(location_to_grab_key.time_to_reach_key+location_to_grab_key.time_to_fight, sequence_part1+sequence_part2)
+        self.reset_keys()
         self.reset()
         self.delete_new_location()
         return return_tuple
 
-    def reset_weights(self):
-        for weight in self.weights:
-            weight.distance_to_reach = 0
+    def reset_keys(self):
+        for key in self.keys:
+            key.time_to_reach = 0
 
     def delete_new_location(self):
         # Remove the last vertex from the list of vertices
-        new_location = self.vertices.pop()
+        new_location = self.locations.pop()
 
         # Iterate over all vertices and remove any edge that connects to the new location
-        for vertex in self.vertices:
-            vertex.edges = [edge for edge in vertex.edges if edge.to_vertex != new_location]
+        for location in self.locations:
+            location.paths = [path for path in location.paths if path.to_location != new_location]
 
     def __str__(self):
-        return "\n".join(str(vertex) for vertex in self.vertices)
+        return "\n".join(str(location) for location in self.locations)
 
 if __name__ == "__main__":
     # Example 1
@@ -196,8 +193,7 @@ if __name__ == "__main__":
     # The keys represented as a list of tuples
     keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
     # Creating a FloorGraph object based on the given paths
-    myfloor = Graph(paths, keys)
+    myfloor = FloorGraph(paths, keys)
     start = 3
     exits = [4]
     print(myfloor.climb(start,exits))
-
