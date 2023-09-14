@@ -154,7 +154,7 @@ class FloorGraph:
         keys: List[List[int]], list of keys represented as [k, y]
 
         :Output, return or postcondition:
-        None
+        construct the graph and initialize Key objects
 
         :Time complexity:
         O(|V| + |E|), where |V| is the number of locations and |E| is the total number of paths
@@ -310,10 +310,12 @@ class FloorGraph:
         Adds a new location that is connected to all exits by paths with travel_time 0.
 
         :Time complexity:
-        O(n), where n is the number of elements in the exits list. For each exit, it performs an operation.
+        O(|V|). But originally O(|N|), where |N| is the number of elements in the exits list.
+        For each exit, it performs an operation. But there is at most |V| exits.
 
         :Aux space complexity:
-        O(n), where n is the number of elements in the exits list. Creates a new Path instance for each exit_location.
+        O(|V|). But originally O(|N|), where |N| is the number of elements in the exits list.
+        Creates a new Path instance for each exit_location.But there is at most |V| exits.
         """
         new_location = Location(len(self.locations))
         self.locations.append(new_location)
@@ -334,10 +336,10 @@ class FloorGraph:
         Update the time to reach for each key based on the time to reach the location where the key is at.
 
         :Time complexity:
-        O((|E|+|V|) log |V|), originally O((|E|+|V|) log |V| + |K|), where |E| is the number of edges,
-        |V| is the number of vertices, and |K| is the number of keys. This is because it runs Dijkstra’s algorithm,
-        which has a time complexity of O((|E|+|V|) log |V|), and then updates the time to reach each key,
-        which takes O(|K|) time. But key is not counted in complexity so it's O((|E|+|V|) log |V|).
+        O((|E|+|V|) log |V|). But originally O((|E|+|V|) log |V| + |K|), where |E| is the number of edges, |V| is the
+        number of vertices, and |K| is the number of keys. This is because it runs Dijkstra’s algorithm, which has a
+        time complexity of O((|E|+|V|) log |V|), and then updates the time to reach each key, which takes O(|K|) time.
+        But there are at most |V| keys.
 
         :Aux space complexity:
         O(|V|), as it needs to store the vertices in the priority queue for Dijkstra’s algorithm.
@@ -357,10 +359,11 @@ class FloorGraph:
         None
 
         :Output, return or postcondition:
-        Key - the Key object with the minimum time_to_reach_key + y
+        Key: the Key object with the minimum time_to_reach_key + y
 
         :Time complexity:
-        O(1), originally O(|K|). Where K is the number of keys, but keys aren't counted for complexity.
+        O(|V|). But originally O(|K|), where |K| is the number of keys. Needs to iterate over all keys to find the minimum.
+        But there is at most |V| keys.
 
         :Aux space complexity:
         O(1), does not use any additional space.
@@ -442,10 +445,12 @@ class FloorGraph:
         None
 
         :Time complexity:
-        O(K), where K is the number of keys
+        O(|V|). But originally O(|K|) where |K| is the number of keys.
+        This is because it needs to iterate over all keys to reset their time_to_reach attribute.
+        But there is at most |V| keys.
 
         :Aux space complexity:
-        O(1)
+        O(1), as it does not use any additional space.
         """
         for key in self.keys:
             key.time_to_reach = 0
@@ -462,10 +467,14 @@ class FloorGraph:
         None
 
         :Time complexity:
-        O(N + M), where N is the number of locations and M is the total number of paths
+        O(|V| + |E|), where |V| is the number of vertices (locations) and |E| is the number of edges (paths).
+        This is because it needs to remove the last vertex from the list of vertices (which takes O(1) time),
+        and then it needs to iterate over all remaining vertices and their edges to remove any edges that lead to the
+        deleted vertex (which takes O(|V| + |E|) time).
 
         :Aux space complexity:
-        O(N + M)
+        O(|V| + |E|), as it creates a new list of edges for each vertex in the worst case.
+        Happens when every location in the graph has a path to the location being deleted.
         """
         new_location = self.locations.pop()
 
