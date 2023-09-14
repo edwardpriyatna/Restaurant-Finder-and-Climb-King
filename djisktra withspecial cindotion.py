@@ -122,10 +122,14 @@ class Graph:
         start_vertex = self.vertices[start_vertex_index]
         self.dijkstra(start_vertex)
 
-        # Exclude vertices with a weight of 0
-        weighted_vertices = [vertex for vertex in self.vertices if vertex.weight != 0]
+        min_weighted_vertex = None
+        for vertex in self.vertices:
+            if vertex.weight != 0 and (
+                    min_weighted_vertex is None or vertex.time_to_reach + vertex.weight < min_weighted_vertex.time_to_reach + min_weighted_vertex.weight):
+                min_weighted_vertex = vertex
 
-        min_weighted_vertex = min(weighted_vertices, key=lambda vertex: vertex.time_to_reach + vertex.weight)
+        if min_weighted_vertex is None:
+            return None
 
         path = []
         current_vertex = min_weighted_vertex
