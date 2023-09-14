@@ -36,7 +36,7 @@ class Weight:
         return f"Weight of vertex {self.vertex_index} with distance to reach {self.distance_to_reach} " \
                f"and distance to get {self.distance_to_get}"
 
-class Graph:
+class FloorGraph:
     def __init__(self, edges, weights):
         self.vertices = []
         self.weights = []
@@ -153,17 +153,19 @@ class Graph:
         self.get_minimum_distance_to_weight(len(self.vertices)-1)
         self.flip_graph()
         self.reset()
-        return myfloor.get_minimum_weight()
+        return self.get_minimum_weight()
 
     def climb(self,start,exits):
         vertex_to_grab_weight=self.find_vertex_to_grab_weight(start,exits)
         sequence_part1=self.get_shortest_path(start,vertex_to_grab_weight.vertex_index)
+        if sequence_part1 is None:
+            return None
         sequence_part1.pop()
-        print(sequence_part1)
+
         self.reset()
         sequence_part2=self.get_shortest_path(vertex_to_grab_weight.vertex_index,len(self.vertices)-1)
         sequence_part2.pop()
-        print(sequence_part2)
+
         return_tuple=(vertex_to_grab_weight.distance_to_reach+ vertex_to_grab_weight.distance_to_get, sequence_part1+sequence_part2)
         self.reset_weights()
         self.reset()
