@@ -1,4 +1,5 @@
 import heapq
+
 class Vertex:
     def __init__(self, name, weight=0):
         self.name = name
@@ -8,7 +9,6 @@ class Vertex:
         self.edges = []
         self.previous_vertex = None
         self.weight = weight
-        self.added_weight = 0
 
     def __lt__(self, other):
         return self.time_to_reach < other.time_to_reach
@@ -16,8 +16,7 @@ class Vertex:
     def __str__(self):
         return f"Vertex {self.name}, weight {self.weight}, visited {self.visited}, discovered {self.discovered}, " \
                f"time_to_reach {self.time_to_reach}, edges {[str(edge) for edge in self.edges]}, " \
-               f"previous_vertex {self.previous_vertex.name if self.previous_vertex else None}, added_weight {self.added_weight}"
-
+               f"previous_vertex {self.previous_vertex.name if self.previous_vertex else None}"
 
 class Edge:
     def __init__(self, to_vertex, weight):
@@ -27,20 +26,27 @@ class Edge:
     def __str__(self):
         return f"Edge to {self.to_vertex.name}, weight {self.weight}"
 
-
 class Graph:
-    def __init__(self, edges, weights):
-        self.vertices = [Vertex(i) for i in range(max(max(edges, key=lambda x: max(x[:2]))[:2]) + 1)]
+    def __init__(self,edges,weights):
+        self.vertices = []
+        self.construct_graph(edges, weights)
+
+    def add_vertex(self, vertex):
+        self.vertices.append(vertex)
+
+    def add_edge(self, from_vertex_index, to_vertex_index, weight):
+        edge_instance = Edge(self.vertices[to_vertex_index], weight)
+        self.vertices[from_vertex_index].edges.append(edge_instance)
+
+    def construct_graph(self, edges, weights):
+        for i in range(max(max(edges, key=lambda x: max(x[:2]))[:2]) + 1):
+            self.add_vertex(Vertex(i))
 
         for weight in weights:
             self.vertices[weight[0]].weight = weight[1]
 
         for edge in edges:
-            edge_instance = Edge(self.vertices[edge[1]], edge[2])
-            self.vertices[edge[0]].edges.append(edge_instance)
-
-    def add_vertex(self, vertex):
-        self.vertices.append(vertex)
+            self.add_edge(*edge)
 
     def dijkstra(self, start_vertex):
         queue = []
@@ -49,16 +55,19 @@ class Graph:
 
         while queue:
             current_vertex = heapq.heappop(queue)
+
+            if current_vertex.visited:
+                continue
+
             current_vertex.visited = True
 
             for edge in current_vertex.edges:
-                if not edge.to_vertex.visited:
-                    tentative_distance = current_vertex.time_to_reach + edge.weight
-                    if tentative_distance < edge.to_vertex.time_to_reach:
-                        edge.to_vertex.time_to_reach = tentative_distance
-                        edge.to_vertex.discovered = True
-                        edge.to_vertex.previous_vertex = current_vertex
-                        heapq.heappush(queue, edge.to_vertex)
+                tentative_distance = current_vertex.time_to_reach + edge.weight
+                if tentative_distance < edge.to_vertex.time_to_reach:
+                    edge.to_vertex.time_to_reach = tentative_distance
+                    edge.to_vertex.discovered = True
+                    edge.to_vertex.previous_vertex = current_vertex
+                    heapq.heappush(queue, edge.to_vertex)
 
     def get_shortest_path(self, start_vertex_index, end_vertex_index):
         start_vertex = self.vertices[start_vertex_index]
@@ -78,6 +87,13 @@ class Graph:
         path.reverse()
         return end_vertex.time_to_reach, path
 
+    def reset(self):
+        for vertex in self.vertices:
+            vertex.visited = False
+            vertex.discovered = False
+            vertex.time_to_reach = float('inf')
+            vertex.previous_vertex = None
+
     def __str__(self):
         return "\n".join(str(vertex) for vertex in self.vertices)
 
@@ -88,9 +104,7 @@ if __name__ == "__main__":
     # The weigted vertices represented as a list of tuples
     weights = [(0, 5), (3, 2), (1, 3)]
 
-    # Creating a Graph object based on the given edges and weights
-    myfloor = Graph(edges, weights)
+    # Creating a Graph object and constructing the graph based on the given edges and weights
+    myfloor = Graph(edges,weights)
     print(myfloor)
-
-    print(myfloor.get_shortest_path(1,3))
-    print(myfloor)
+    print(myfloor.get_shortest_path(2,1))
