@@ -1,29 +1,47 @@
 import heapq
 
 class Vertex:
-    def __init__(self, name):
+    def __init__(self, name, weight=0):
         self.name = name
         self.visited = False
         self.discovered = False
         self.time_to_reach = float('inf')
         self.edges = []
-        self.previous_vertex = None  # Add this line
+        self.previous_vertex = None
+        self.weight = weight
+        self.added_weight = 0
 
     def __lt__(self, other):
         return self.time_to_reach < other.time_to_reach
+
+    def __str__(self):
+        return f"Vertex {self.name}, weight {self.weight}, visited {self.visited}, discovered {self.discovered}, " \
+               f"time_to_reach {self.time_to_reach}, edges {[str(edge) for edge in self.edges]}, " \
+               f"previous_vertex {self.previous_vertex.name if self.previous_vertex else None}, added_weight {self.added_weight}"
+
 
 class Edge:
     def __init__(self, to_vertex, weight):
         self.to_vertex = to_vertex
         self.weight = weight
 
+    def __str__(self):
+        return f"Edge to {self.to_vertex.name}, weight {self.weight}"
+
+
 class Graph:
-    def __init__(self):
-        self.vertices = []
+    def __init__(self, edges, weights):
+        self.vertices = [Vertex(i) for i in range(max(max(edges, key=lambda x: max(x[:2]))[:2]) + 1)]
+
+        for weight in weights:
+            self.vertices[weight[0]].weight = weight[1]
+
+        for edge in edges:
+            edge_instance = Edge(self.vertices[edge[1]], edge[2])
+            self.vertices[edge[0]].edges.append(edge_instance)
 
     def add_vertex(self, vertex):
         self.vertices.append(vertex)
-
 
     def dijkstra(self, start_vertex):
         queue = []
@@ -37,16 +55,25 @@ class Graph:
             for edge in current_vertex.edges:
                 if not edge.to_vertex.visited:
                     tentative_distance = current_vertex.time_to_reach + edge.weight
+                    added_weight = current_vertex.added_weight
+                    if current_vertex.weight > added_weight:
+                        tentative_distance += current_vertex.weight - added_weight
+                        added_weight = current_vertex.weight
                     if tentative_distance < edge.to_vertex.time_to_reach:
                         edge.to_vertex.time_to_reach = tentative_distance
                         edge.to_vertex.discovered = True
                         edge.to_vertex.previous_vertex = current_vertex
+                        edge.to_vertex.added_weight = added_weight
                         heapq.heappush(queue, edge.to_vertex)
-
-    def get_shortest_path(self, start_vertex, end_vertex):
+    def get_shortest_path(self, start_vertex_index, end_vertex_index):
+        start_vertex = self.vertices[start_vertex_index]
+        end_vertex = self.vertices[end_vertex_index]
         self.dijkstra(start_vertex)
         path = []
         current_vertex = end_vertex
+
+        if current_vertex.added_weight == 0:
+            return float('inf'), []
 
         while current_vertex is not None:
             path.append(current_vertex.name)
@@ -55,39 +82,18 @@ class Graph:
         path.reverse()
         return end_vertex.time_to_reach, path
 
+    def __str__(self):
+        return "\n".join(str(vertex) for vertex in self.vertices)
+
+
 if __name__ == "__main__":
-    # Create vertices
-    A = Vertex('A')
-    B = Vertex('B')
-    C = Vertex('C')
-    D = Vertex('D')
-    E = Vertex('E')
-    F = Vertex('F')
-    G = Vertex('G')
+    # The edges represented as a list of tuples
+    edges = [(0, 1, 4), (0, 3, 2), (0, 2, 3), (2, 3, 2), (3, 0, 3)]
+    # The weigted vertices represented as a list of tuples
+    weights = [(0, 5), (3, 2), (1, 3)]
 
-    # Create edges
-    A.edges.append(Edge(B, 4))
-    B.edges.append(Edge(A, 3))  # Bidirectional edge
-    A.edges.append(Edge(C, 3))  # Unidirectional edge
-    A.edges.append(Edge(D, 3))  # Unidirectional edge
-    B.edges.append(Edge(E, 4))  # Unidirectional edge
-    C.edges.append(Edge(F, 2))
-    F.edges.append(Edge(C, 2))  # Bidirectional edge
-    D.edges.append(Edge(G, 1))  # Unidirectional edge
-    E.edges.append(Edge(G, 3))  # Unidirectional edge
-    F.edges.append(Edge(G, 1))
-    G.edges.append(Edge(F, 2))  # Bidirectional edge
+    # Creating a Graph object based on the given edges and weights
+    myfloor = Graph(edges, weights)
+    print(myfloor)
 
-    # Create graph and add vertices
-    graph = Graph()
-    graph.add_vertex(A)
-    graph.add_vertex(B)
-    graph.add_vertex(C)
-    graph.add_vertex(D)
-    graph.add_vertex(E)
-    graph.add_vertex(F)
-    graph.add_vertex(G)
-
-    # Get shortest path from A to G
-    distance, path = graph.get_shortest_path(B, G)
-    print(f"The shortest path from B to G is {path} with a total weight of {distance}")
+    print(myfloor.get_shortest_path(3,1))
