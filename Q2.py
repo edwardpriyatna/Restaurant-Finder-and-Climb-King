@@ -1,92 +1,167 @@
-from typing import List, Tuple, Optional
 import heapq
 
-class Location:
-    def __init__(self, id: int, monster_defeat_time: int = 0, has_key: bool = False):
-        self.id = id
-        self.monster_defeat_time = monster_defeat_time
-        self.paths = []
-        self.has_key = has_key
+class Vertex:
+    def __init__(self, name, weight=0):
+        self.name = name
+        self.visited = False
+        self.discovered = False
+        self.time_to_reach = float('inf')
+        self.edges = []
+        self.previous_vertex = None
+        self.weight = weight
 
-    def add_path(self, destination, travel_time):
-        self.paths.append(Path(self, destination, travel_time))
-
-    def __str__(self):
-        paths_str = ', '.join([str(path) for path in self.paths])
-        return f"Location(id={self.id}, monster_defeat_time={self.monster_defeat_time}, has_key={self.has_key}, paths=[{paths_str}])"
-
-class Path:
-    def __init__(self, start_location: Location, end_location: Location, travel_time: int):
-        self.start_location = start_location
-        self.end_location = end_location
-        self.travel_time = travel_time
+    def __lt__(self, other):
+        return self.time_to_reach < other.time_to_reach
 
     def __str__(self):
-        return f"Path(end_location={self.end_location.id}, travel_time={self.travel_time})"
+        return f"Vertex {self.name}, weight {self.weight}, visited {self.visited}, discovered {self.discovered}, " \
+               f"time_to_reach {self.time_to_reach}, edges {[str(edge) for edge in self.edges]}, " \
+               f"previous_vertex {self.previous_vertex.name if self.previous_vertex else None}"
 
-class FloorGraph:
-    def __init__(self, paths, keys):
-        self.total_locations = self._get_total_locations(paths)
-        self.locations = [Location(i) for i in range(self.total_locations)]
-        self._populate_locations_with_paths(paths)
-        self._populate_locations_with_keys(keys)
+class Edge:
+    def __init__(self, to_vertex, weight):
+        self.to_vertex = to_vertex
+        self.weight = weight
 
-    def _get_total_locations(self, paths):
-        return max(max(paths, key=lambda x: max(x[0], x[1]))[:2]) + 1
+    def __str__(self):
+        return f"Edge to {self.to_vertex.name}, weight {self.weight}"
 
-    def _populate_locations_with_paths(self, paths):
-        for path in paths:
-            start_location_id, end_location_id, travel_time = path
-            path = Path(self.locations[start_location_id], self.locations[end_location_id], travel_time)
-            self.locations[start_location_id].add_path(self.locations[end_location_id], travel_time)
+class Graph:
+    def __init__(self,edges,weights):
+        self.vertices = []
+        self.construct_graph(edges, weights)
 
-    def _populate_locations_with_keys(self, keys):
-        for key in keys:
-            key_location_id, monster_defeat_time = key
-            self.locations[key_location_id].has_key = True
-            self.locations[key_location_id].monster_defeat_time = monster_defeat_time
+    def add_vertex(self, vertex):
+        self.vertices.append(vertex)
 
-    def climb(self, start, exits):
-        exit_locations = set(exits)
-        min_heap = [(0, start, set(), [start])]  # (total_time, current_location, collected_keys, path)
+    def add_edge(self, from_vertex_index, to_vertex_index, weight):
+        edge_instance = Edge(self.vertices[to_vertex_index], weight)
+        self.vertices[from_vertex_index].edges.append(edge_instance)
 
-        while min_heap:
-            total_time, current_location, collected_keys, path = heapq.heappop(min_heap)
+    def construct_graph(self, edges, weights):
+        for i in range(max(max(edges, key=lambda x: max(x[:2]))[:2]) + 1):
+            self.add_vertex(Vertex(i))
 
-            if current_location in exit_locations:
-                return total_time, path
+        for weight in weights:
+            self.vertices[weight[0]].weight = weight[1]
 
-            for path_obj in self.locations[current_location].paths:
-                next_location = path_obj.end_location
-                travel_time = path_obj.travel_time
+        for edge in edges:
+            self.add_edge(*edge)
 
-                if next_location.id not in collected_keys:
-                    next_keys = set(collected_keys)
-                    if next_location.has_key:
-                        next_keys.add(next_location.id)
-                        heapq.heappush(min_heap, (total_time + travel_time + next_location.monster_defeat_time, next_location.id, next_keys, path + [next_location.id]))
-                    else:
-                        heapq.heappush(min_heap, (total_time + travel_time, next_location.id, next_keys, path + [next_location.id]))
+    def dijkstra(self, start_vertex):
+        queue = []
+        start_vertex.time_to_reach = 0
+        heapq.heappush(queue, start_vertex)
 
-        return None  # No valid route found
+        while queue:
+            current_vertex = heapq.heappop(queue)
+
+            if current_vertex.visited:
+                continue
+
+            current_vertex.visited = True
+
+            for edge in current_vertex.edges:
+                tentative_distance = current_vertex.time_to_reach + edge.weight
+                if tentative_distance < edge.to_vertex.time_to_reach:
+                    edge.to_vertex.time_to_reach = tentative_distance
+                    edge.to_vertex.discovered = True
+                    edge.to_vertex.previous_vertex = current_vertex
+                    heapq.heappush(queue, edge.to_vertex)
+
+    def get_shortest_path(self, start_vertex_index, end_vertex_index):
+        start_vertex = self.vertices[start_vertex_index]
+        end_vertex = self.vertices[end_vertex_index]
+        self.dijkstra(start_vertex)
+
+        if end_vertex.time_to_reach == float('inf'):
+            return None
+
+        path = []
+        current_vertex = end_vertex
+
+        while current_vertex is not None:
+            path.insert(0, current_vertex.name)
+            current_vertex = current_vertex.previous_vertex
+
+        return end_vertex.time_to_reach, path
+
+    def reset(self):
+        for vertex in self.vertices:
+            vertex.visited = False
+            vertex.discovered = False
+            vertex.time_to_reach = float('inf')
+            vertex.previous_vertex = None
+
+    def flip_graph(self):
+        # Create a new list of vertices with the same names but no edges
+        flipped_vertices = [Vertex(i, self.vertices[i].weight) for i in range(len(self.vertices))]
+
+        # Iterate over the original vertices and their edges
+        for vertex in self.vertices:
+            for edge in vertex.edges:
+                # Add a new edge with reversed direction to the corresponding vertex in the new list
+                flipped_edge = Edge(flipped_vertices[vertex.name], edge.weight)
+                flipped_vertices[edge.to_vertex.name].edges.append(flipped_edge)
+
+        # Replace the original list of vertices with the new one
+        self.vertices = flipped_vertices
+    def add_new_location(self, exits):
+        # Create a new vertex and add it to the list of vertices
+        new_vertex = Vertex(len(self.vertices))
+        self.vertices.append(new_vertex)
+
+        # Connect the new vertex to all exits with an edge of weight 0
+        for exit in exits:
+            exit_edge = Edge(self.vertices[exit], 0)
+            new_vertex.edges.append(exit_edge)
+
+    def get_minimum_weighted_vertice(self, start_vertex_index):
+        start_vertex = self.vertices[start_vertex_index]
+        self.dijkstra(start_vertex)
+
+        min_weighted_vertex = None
+        for vertex in self.vertices:
+            if vertex.weight != 0 and (
+                    min_weighted_vertex is None or vertex.time_to_reach + vertex.weight < min_weighted_vertex.time_to_reach + min_weighted_vertex.weight):
+                min_weighted_vertex = vertex
+
+        if min_weighted_vertex is None:
+            return None
+
+        path = []
+        current_vertex = min_weighted_vertex
+
+        while current_vertex is not None:
+            path.append(current_vertex.name)
+            current_vertex = current_vertex.previous_vertex
+
+        path.reverse()
+        return min_weighted_vertex.name, min_weighted_vertex.time_to_reach, path, min_weighted_vertex.weight
+
+    def get_shortest_path_all_weighted_vertices(self, start_vertex_index):
+        start_vertex = self.vertices[start_vertex_index]
+        self.dijkstra(start_vertex)
+        shortest_paths = []
+
+        for vertex in self.vertices:
+            if vertex.weight != 0 and vertex.time_to_reach != float('inf'):
+                path = []
+                current_vertex = vertex
+
+                while current_vertex is not None:
+                    path.append(current_vertex.name)
+                    current_vertex = current_vertex.previous_vertex
+
+                path.reverse()
+                shortest_paths.append((vertex.name,vertex.time_to_reach, path, vertex.weight))
+
+        return shortest_paths
+    def __str__(self):
+        return "\n".join(str(vertex) for vertex in self.vertices)
 
 if __name__ == "__main__":
-    # Create a FloorGraph object and perform the climb operation
-    paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2), (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4), (7, 8, 2), (8, 7, 2), (7, 3, 2), (8, 0, 11), (4, 3, 1), (4, 8, 10)]
-    keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
-    myfloor = FloorGraph(paths, keys)
-
-    start = 1
-    exits = [7, 2, 4]
-    result = myfloor.climb(start, exits)
-    if result:
-        total_time, path = result
-        print(f"Total Time: {total_time}")
-        print(f"Path: {path}")
-    else:
-        print("No valid route found")
-
-if __name__ == "__main__":
+    # Example 1
     # The paths represented as a list of tuples
     paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2),
              (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4), (7, 8, 2),
@@ -94,12 +169,6 @@ if __name__ == "__main__":
     # The keys represented as a list of tuples
     keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
     # Creating a FloorGraph object based on the given paths
-    myfloor = FloorGraph(paths, keys)
-    print(myfloor)
-    start = 1
-    exits = [7, 2, 4]
-    print(myfloor.climb(start, exits))
-
-
-
+    myfloor = Graph(paths, keys)
+    print(myfloor.get_shortest_path(0,8))
 
