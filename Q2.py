@@ -98,7 +98,7 @@ class Graph:
             path.insert(0, current_vertex.name)
             current_vertex = current_vertex.previous_vertex
 
-        return end_vertex.time_to_reach, path
+        return path
 
     def reset(self):
         for vertex in self.vertices:
@@ -157,15 +157,27 @@ class Graph:
 
     def climb(self,start,exits):
         vertex_to_grab_weight=self.find_vertex_to_grab_weight(start,exits)
-        print(vertex_to_grab_weight.distance_to_reach+ vertex_to_grab_weight.distance_to_get)
-        print(self.get_shortest_path(start,vertex_to_grab_weight.vertex_index))
+        sequence_part1=self.get_shortest_path(start,vertex_to_grab_weight.vertex_index)
+        sequence_part1.pop()
         self.reset()
-        print(self.get_shortest_path(vertex_to_grab_weight.vertex_index,len(self.vertices)-1))
+        sequence_part2=self.get_shortest_path(vertex_to_grab_weight.vertex_index,len(self.vertices)-1)
+        sequence_part2.pop()
         self.reset_weights()
+        self.reset()
+        self.delete_new_location()
+        return (vertex_to_grab_weight.distance_to_reach+ vertex_to_grab_weight.distance_to_get,sequence_part1.extend(sequence_part2))
 
     def reset_weights(self):
         for weight in self.weights:
             weight.distance_to_reach = 0
+
+    def delete_new_location(self):
+        # Remove the last vertex from the list of vertices
+        new_location = self.vertices.pop()
+
+        # Iterate over all vertices and remove any edge that connects to the new location
+        for vertex in self.vertices:
+            vertex.edges = [edge for edge in vertex.edges if edge.to_vertex != new_location]
 
     def __str__(self):
         return "\n".join(str(vertex) for vertex in self.vertices)
@@ -182,5 +194,5 @@ if __name__ == "__main__":
     myfloor = Graph(paths, keys)
     start = 3
     exits = [4]
-    myfloor.climb(start,exits)
+    print(myfloor.climb(start,exits))
 
