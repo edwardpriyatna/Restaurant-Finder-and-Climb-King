@@ -1,10 +1,9 @@
 import heapq
 from typing import List, Optional
 
-
 class Location:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, ID):
+        self.ID = ID
         self.visited = False
         self.discovered = False
         self.time_to_reach = float('inf')
@@ -15,30 +14,27 @@ class Location:
         return self.time_to_reach < other.time_to_reach
 
     def __str__(self) -> str:
-        return f"Vertex {self.name}, visited {self.visited}, discovered {self.discovered}, " \
+        return f"Vertex {self.ID}, visited {self.visited}, discovered {self.discovered}, " \
                f"time_to_reach {self.time_to_reach}, edges {[str(path) for path in self.paths]}, " \
-               f"previous_vertex {self.previous_location.name if self.previous_location else None}"
-
+               f"previous_vertex {self.previous_location.ID if self.previous_location else None}"
 
 class Path:
-    def __init__(self, to_location, travel_time):
-        self.to_location = to_location
-        self.travel_time = travel_time
+    def __init__(self, v, x):
+        self.v = v
+        self.x = x
 
     def __str__(self) -> str:
-        return f"Edge to {self.to_location.name}, weight {self.travel_time}"
-
+        return f"Edge to {self.v.ID}, weight {self.x}"
 
 class Key:
-    def __init__(self, location_index, time_to_fight):
-        self.location_index = location_index
+    def __init__(self, k, y):
+        self.k = k
         self.time_to_reach_key = 0
-        self.time_to_fight = time_to_fight
+        self.y = y
 
     def __str__(self) -> str:
-        return f"Weight of vertex {self.location_index} with distance to reach {self.time_to_reach_key} " \
-               f"and distance to get {self.time_to_fight}"
-
+        return f"Weight of vertex {self.k} with distance to reach {self.time_to_reach_key} " \
+               f"and distance to get {self.y}"
 
 class FloorGraph:
     def __init__(self, paths: List[List[int]], keys: List[List[int]]):
@@ -52,9 +48,9 @@ class FloorGraph:
     def add_key(self, key):
         self.keys.append(key)
 
-    def add_path(self, from_location_index: int, to_location_index: int, travel_time: int):
-        path_instance = Path(self.locations[to_location_index], travel_time)
-        self.locations[from_location_index].paths.append(path_instance)
+    def add_path(self, from_k: int, v_index: int, x: int):
+        path_instance = Path(self.locations[v_index], x)
+        self.locations[from_k].paths.append(path_instance)
 
     def construct_graph(self, paths: List[List[int]], keys: List[List[int]]):
         for i in range(max(max(paths, key=lambda x: max(x[:2]))[:2]) + 1):
@@ -78,16 +74,16 @@ class FloorGraph:
             current_location.visited = True
 
             for path in current_location.paths:
-                tentative_distance = current_location.time_to_reach + path.travel_time
-                if tentative_distance < path.to_location.time_to_reach:
-                    path.to_location.time_to_reach = tentative_distance
-                    path.to_location.discovered = True
-                    path.to_location.previous_location = current_location
-                    heapq.heappush(queue, path.to_location)
+                tentative_distance = current_location.time_to_reach + path.x
+                if tentative_distance < path.v.time_to_reach:
+                    path.v.time_to_reach = tentative_distance
+                    path.v.discovered = True
+                    path.v.previous_location = current_location
+                    heapq.heappush(queue, path.v)
 
-    def get_shortest_path(self, start_location_index: int, end_location_index: int) -> Optional[List[int]]:
-        start_location = self.locations[start_location_index]
-        end_location = self.locations[end_location_index]
+    def get_shortest_path(self, start_k: int, end_k: int) -> Optional[List[int]]:
+        start_location = self.locations[start_k]
+        end_location = self.locations[end_k]
         self.dijkstra(start_location)
 
         if end_location.time_to_reach == float('inf'):
@@ -97,7 +93,7 @@ class FloorGraph:
         current_location = end_location
 
         while current_location is not None:
-            path.insert(0, current_location.name)
+            path.insert(0, current_location.ID)
             current_location = current_location.previous_location
 
         return path
@@ -114,8 +110,8 @@ class FloorGraph:
 
         for location in self.locations:
             for path in location.paths:
-                flipped_path = Path(flipped_locations[location.name], path.travel_time)
-                flipped_locations[path.to_location.name].paths.append(flipped_path)
+                flipped_path = Path(flipped_locations[location.ID], path.x)
+                flipped_locations[path.v.ID].paths.append(flipped_path)
 
         self.locations = flipped_locations
 
@@ -131,11 +127,11 @@ class FloorGraph:
         self.dijkstra(self.locations[start])
 
         for key in self.keys:
-            location = self.locations[key.location_index]
+            location = self.locations[key.k]
             key.time_to_reach_key += location.time_to_reach
 
     def get_minimum_key(self) -> 'Key':
-        return min(self.keys, key=lambda key: key.time_to_reach_key + key.time_to_fight)
+        return min(self.keys, key=lambda key: key.time_to_reach_key + key.y)
 
     def find_location_to_grab_key(self, start: int, exits: List[int]) -> 'Key':
         self.get_minimum_distance_to_key(start)
@@ -149,20 +145,21 @@ class FloorGraph:
 
     def climb(self, start: int, exits: List[int]) -> Optional[tuple]:
         location_to_grab_key = self.find_location_to_grab_key(start, exits)
-        sequence_part1 = self.get_shortest_path(start, location_to_grab_key.location_index)
-        if sequence_part1 is None:
+        route_part1 = self.get_shortest_path(start, location_to_grab_key.k)
+        if route_part1 is None:
             return None
-        sequence_part1.pop()
+        route_part1.pop() #pop the location where the key is grabbed
 
         self.reset()
-        sequence_part2 = self.get_shortest_path(location_to_grab_key.location_index, len(self.locations) - 1)
-        sequence_part2.pop()
-        return_tuple = (location_to_grab_key.time_to_reach_key + location_to_grab_key.time_to_fight, sequence_part1 + sequence_part2)
+        route_part2 = self.get_shortest_path(location_to_grab_key.k, len(self.locations) - 1)
+        route_part2.pop() #pop the new location
+        total_time= location_to_grab_key.time_to_reach_key + location_to_grab_key.y
+        route=route_part1 + route_part2
 
         self.reset_keys()
         self.reset()
         self.delete_new_location()
-        return return_tuple
+        return total_time,route
 
     def reset_keys(self):
         for key in self.keys:
@@ -172,11 +169,10 @@ class FloorGraph:
         new_location = self.locations.pop()
 
         for location in self.locations:
-            location.paths = [path for path in location.paths if path.to_location != new_location]
+            location.paths = [path for path in location.paths if path.v != new_location]
 
     def __str__(self) -> str:
         return "\n".join(str(location) for location in self.locations)
-
 
 if __name__ == "__main__":
     # Example 1
