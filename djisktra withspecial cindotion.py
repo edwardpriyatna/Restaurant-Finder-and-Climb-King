@@ -1,5 +1,4 @@
 import heapq
-
 class Vertex:
     def __init__(self, name, weight=0):
         self.name = name
@@ -55,25 +54,22 @@ class Graph:
             for edge in current_vertex.edges:
                 if not edge.to_vertex.visited:
                     tentative_distance = current_vertex.time_to_reach + edge.weight
-                    added_weight = current_vertex.added_weight
-                    if current_vertex.weight > added_weight:
-                        tentative_distance += current_vertex.weight - added_weight
-                        added_weight = current_vertex.weight
                     if tentative_distance < edge.to_vertex.time_to_reach:
                         edge.to_vertex.time_to_reach = tentative_distance
                         edge.to_vertex.discovered = True
                         edge.to_vertex.previous_vertex = current_vertex
-                        edge.to_vertex.added_weight = added_weight
                         heapq.heappush(queue, edge.to_vertex)
+
     def get_shortest_path(self, start_vertex_index, end_vertex_index):
         start_vertex = self.vertices[start_vertex_index]
         end_vertex = self.vertices[end_vertex_index]
         self.dijkstra(start_vertex)
+
+        if end_vertex.time_to_reach == float('inf'):
+            return None
+
         path = []
         current_vertex = end_vertex
-
-        if current_vertex.added_weight == 0:
-            return float('inf'), []
 
         while current_vertex is not None:
             path.append(current_vertex.name)
@@ -96,4 +92,5 @@ if __name__ == "__main__":
     myfloor = Graph(edges, weights)
     print(myfloor)
 
-    print(myfloor.get_shortest_path(3,1))
+    print(myfloor.get_shortest_path(1,3))
+    print(myfloor)
