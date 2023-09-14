@@ -26,13 +26,27 @@ class Edge:
     def __str__(self):
         return f"Edge to {self.to_vertex.name}, weight {self.weight}"
 
+class Weight:
+    def __init__(self, vertex_index, distance_to_get):
+        self.vertex_index = vertex_index
+        self.distance_to_reach = 0
+        self.distance_to_get = distance_to_get
+
+    def __str__(self):
+        return f"Weight of vertex {self.vertex_index} with distance to reach {self.distance_to_reach} " \
+               f"and distance to get {self.distance_to_get}"
+
 class Graph:
-    def __init__(self,edges,weights):
+    def __init__(self, edges, weights):
         self.vertices = []
+        self.weights = []
         self.construct_graph(edges, weights)
 
     def add_vertex(self, vertex):
         self.vertices.append(vertex)
+
+    def add_weight(self, weight):
+        self.weights.append(weight)
 
     def add_edge(self, from_vertex_index, to_vertex_index, weight):
         edge_instance = Edge(self.vertices[to_vertex_index], weight)
@@ -43,7 +57,7 @@ class Graph:
             self.add_vertex(Vertex(i))
 
         for weight in weights:
-            self.vertices[weight[0]].weight = weight[1]
+            self.add_weight(Weight(weight[0], weight[1]))
 
         for edge in edges:
             self.add_edge(*edge)
@@ -116,6 +130,17 @@ class Graph:
             exit_edge = Edge(self.vertices[exit], 0)
             new_vertex.edges.append(exit_edge)
 
+    def get_minimum_distance_to_weight(self, start):
+
+        # Run Dijkstra's algorithm from the start vertex
+        self.dijkstra(self.vertices[start])
+
+        # Update the distance_to_reach of each weight
+        for weight in self.weights:
+            vertex = self.vertices[weight.vertex_index]
+            weight.distance_to_reach += vertex.time_to_reach
+
+        return self.weights
     def get_minimum_weighted_vertice(self, start_vertex_index):
         start_vertex = self.vertices[start_vertex_index]
         self.dijkstra(start_vertex)
@@ -162,13 +187,18 @@ class Graph:
 
 if __name__ == "__main__":
     # Example 1
-    # The paths represented as a list of tuples
+    # The edges represented as a list of tuples
     paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2),
              (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4), (7, 8, 2),
              (8, 7, 2), (7, 3, 2), (8, 0, 11), (4, 3, 1), (4, 8, 10)]
-    # The keys represented as a list of tuples
-    keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
-    # Creating a FloorGraph object based on the given paths
+    # The weights represented as a list of tuples
+    keys = [(5, 10), (6, 0), (7, 5), (0, 3), (8, 0)]
+    # Creating a Graph object based on the given paths
     myfloor = Graph(paths, keys)
-    print(myfloor.get_shortest_path(0,8))
+    for weights in myfloor.weights:
+        print(weights)
+    print('after operation')
+    myfloor.get_minimum_distance_to_weight(5)
+    for weights in myfloor.weights:
+        print(weights)
 
