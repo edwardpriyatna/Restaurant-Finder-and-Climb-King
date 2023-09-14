@@ -190,20 +190,18 @@ class Graph:
 
 if __name__ == "__main__":
     # Example 1
-    # The edges represented as a list of tuples
+    # The paths represented as a list of tuples
     paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2),
              (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4), (7, 8, 2),
              (8, 7, 2), (7, 3, 2), (8, 0, 11), (4, 3, 1), (4, 8, 10)]
-    # The weights represented as a list of tuples
+    # The keys represented as a list of tuples
     keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
-    # Creating a Graph object based on the given paths
+    # Creating a FloorGraph object based on the given paths
     myfloor = Graph(paths, keys)
-    for weights in myfloor.weights:
-        print(weights)
-    print('after operation')
-    myfloor.get_minimum_distance_to_weight(4)
-    for weights in myfloor.weights:
-        print(weights)
-    print('getting minimum weight')
+    myfloor.get_minimum_distance_to_weight(1)
+    myfloor.reset()
+    myfloor.flip_graph()
+    myfloor.add_new_location([7,2,4])
+    myfloor.get_minimum_distance_to_weight(9)
     print(myfloor.get_minimum_weight())
 
