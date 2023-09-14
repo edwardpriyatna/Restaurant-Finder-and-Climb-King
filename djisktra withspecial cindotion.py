@@ -173,3 +173,8 @@ if __name__ == "__main__":
     # Creating a FloorGraph object based on the given paths
     myfloor = Graph(paths, keys)
     print(myfloor.get_shortest_path_all_weighted_vertices(1))
+    myfloor.reset()
+    myfloor.flip_graph()
+    myfloor.add_new_location([3,4])
+    print(myfloor)
+    print(myfloor.get_shortest_path_all_weighted_vertices(9))
