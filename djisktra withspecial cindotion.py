@@ -113,10 +113,10 @@ class Graph:
         new_vertex = Vertex(len(self.vertices))
         self.vertices.append(new_vertex)
 
-        # Connect all exits to the new vertex with an edge of weight 0
+        # Connect the new vertex to all exits with an edge of weight 0
         for exit in exits:
-            exit_edge = Edge(new_vertex, 0)
-            self.vertices[exit].edges.append(exit_edge)
+            exit_edge = Edge(self.vertices[exit], 0)
+            new_vertex.edges.append(exit_edge)
 
     def get_minimum_weighted_vertice(self, start_vertex_index):
         start_vertex = self.vertices[start_vertex_index]
@@ -152,3 +152,6 @@ if __name__ == "__main__":
     # Creating a Graph object and constructing the graph based on the given edges and weights
     myfloor = Graph(edges,weights)
     print(myfloor.get_minimum_weighted_vertice(3))
+    myfloor.reset()
+    myfloor.add_new_location([2,1])
+    print(myfloor)
