@@ -155,7 +155,7 @@ class Graph:
                     current_vertex = current_vertex.previous_vertex
 
                 path.reverse()
-                shortest_paths.append((vertex.time_to_reach, path, vertex.weight))
+                shortest_paths.append((vertex.name,vertex.time_to_reach, path, vertex.weight))
 
         return shortest_paths
     def __str__(self):
@@ -171,8 +171,9 @@ if __name__ == "__main__":
     keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
     # Creating a FloorGraph object based on the given paths
     myfloor = Graph(paths, keys)
+    print(myfloor.get_shortest_path_all_weighted_vertices(1))
+    myfloor.reset()
     myfloor.flip_graph()
     myfloor.add_new_location([3,4])
-    print(myfloor)
     print(myfloor.get_shortest_path_all_weighted_vertices(9))
 
