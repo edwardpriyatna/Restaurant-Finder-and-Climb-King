@@ -96,7 +96,7 @@ class Graph:
 
     def flip_graph(self):
         # Create a new list of vertices with the same names but no edges
-        flipped_vertices = [Vertex(i) for i in range(len(self.vertices))]
+        flipped_vertices = [Vertex(i, self.vertices[i].weight) for i in range(len(self.vertices))]
 
         # Iterate over the original vertices and their edges
         for vertex in self.vertices:
@@ -107,7 +107,6 @@ class Graph:
 
         # Replace the original list of vertices with the new one
         self.vertices = flipped_vertices
-
     def add_new_location(self, exits):
         # Create a new vertex and add it to the list of vertices
         new_vertex = Vertex(len(self.vertices))
@@ -144,8 +143,8 @@ class Graph:
     def get_shortest_path_all_weighted_vertices(self, start_vertex_index):
         start_vertex = self.vertices[start_vertex_index]
         self.dijkstra(start_vertex)
-
         shortest_paths = []
+
         for vertex in self.vertices:
             if vertex.weight != 0 and vertex.time_to_reach != float('inf'):
                 path = []
@@ -172,9 +171,8 @@ if __name__ == "__main__":
     keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
     # Creating a FloorGraph object based on the given paths
     myfloor = Graph(paths, keys)
-    print(myfloor.get_shortest_path_all_weighted_vertices(1))
-    myfloor.reset()
     myfloor.flip_graph()
     myfloor.add_new_location([3,4])
     print(myfloor)
     print(myfloor.get_shortest_path_all_weighted_vertices(9))
+
