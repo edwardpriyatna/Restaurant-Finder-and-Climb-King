@@ -97,7 +97,6 @@ class Graph:
     def __str__(self):
         return "\n".join(str(vertex) for vertex in self.vertices)
 
-
 if __name__ == "__main__":
     # The edges represented as a list of tuples
     edges = [(0, 1, 4), (0, 3, 2), (0, 2, 3), (2, 3, 2), (3, 0, 3)]
@@ -108,3 +107,7 @@ if __name__ == "__main__":
     myfloor = Graph(edges,weights)
     print(myfloor)
     print(myfloor.get_shortest_path(2,1))
+    myfloor.reset()
+    print(myfloor.get_shortest_path(1,2))
+    myfloor.reset()
+    print(myfloor.get_shortest_path(3, 2))
