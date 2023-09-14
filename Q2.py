@@ -141,6 +141,9 @@ class Graph:
             weight.distance_to_reach += vertex.time_to_reach
 
         return self.weights
+
+    def get_minimum_weight(self):
+        return min(self.weights, key=lambda weight: weight.distance_to_reach + weight.distance_to_get)
     def get_minimum_weighted_vertice(self, start_vertex_index):
         start_vertex = self.vertices[start_vertex_index]
         self.dijkstra(start_vertex)
@@ -192,13 +195,15 @@ if __name__ == "__main__":
              (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4), (7, 8, 2),
              (8, 7, 2), (7, 3, 2), (8, 0, 11), (4, 3, 1), (4, 8, 10)]
     # The weights represented as a list of tuples
-    keys = [(5, 10), (6, 0), (7, 5), (0, 3), (8, 0)]
+    keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
     # Creating a Graph object based on the given paths
     myfloor = Graph(paths, keys)
     for weights in myfloor.weights:
         print(weights)
     print('after operation')
-    myfloor.get_minimum_distance_to_weight(5)
+    myfloor.get_minimum_distance_to_weight(4)
     for weights in myfloor.weights:
         print(weights)
+    print('getting minimum weight')
+    print(myfloor.get_minimum_weight())
 
