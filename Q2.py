@@ -159,13 +159,16 @@ class Graph:
         vertex_to_grab_weight=self.find_vertex_to_grab_weight(start,exits)
         sequence_part1=self.get_shortest_path(start,vertex_to_grab_weight.vertex_index)
         sequence_part1.pop()
+        print(sequence_part1)
         self.reset()
         sequence_part2=self.get_shortest_path(vertex_to_grab_weight.vertex_index,len(self.vertices)-1)
         sequence_part2.pop()
+        print(sequence_part2)
+        return_tuple=(vertex_to_grab_weight.distance_to_reach+ vertex_to_grab_weight.distance_to_get, sequence_part1+sequence_part2)
         self.reset_weights()
         self.reset()
         self.delete_new_location()
-        return (vertex_to_grab_weight.distance_to_reach+ vertex_to_grab_weight.distance_to_get,sequence_part1.extend(sequence_part2))
+        return return_tuple
 
     def reset_weights(self):
         for weight in self.weights:
