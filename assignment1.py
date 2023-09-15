@@ -4,7 +4,7 @@ def restaurantFinder(d: int, site_list: List[int]) -> Tuple[int, List[int]]:
     """
     Function description:
     This function helps a fast food chain to choose the sites to open restaurants such that no two restaurants are
-    within a certain distance of each other and the overall revenue is maximised.
+    within a certain time of each other and the overall revenue is maximised.
 
     Approach description:
     The function uses dynamic programming to solve this problem. It maintains an array `max_revenue` to store the maximum
@@ -12,7 +12,7 @@ def restaurantFinder(d: int, site_list: List[int]) -> Tuple[int, List[int]]:
     maximum revenue.
 
     :Input:
-    d: The minimum distance between any two chosen sites.
+    d: The minimum time between any two chosen sites.
     site_list: A list of revenues for each site.
 
     :Output, return or postcondition:
@@ -262,9 +262,9 @@ class FloorGraph:
             current_location.visited = True
 
             for path in current_location.paths:
-                tentative_distance = current_location.time_to_reach + path.x
-                if tentative_distance < path.v.time_to_reach:
-                    path.v.time_to_reach = tentative_distance
+                tentative_time = current_location.time_to_reach + path.x
+                if tentative_time < path.v.time_to_reach:
+                    path.v.time_to_reach = tentative_time
                     path.v.discovered = True
                     path.v.previous_location = current_location
                     heapq.heappush(queue, path.v)
@@ -383,10 +383,10 @@ class FloorGraph:
             exit_path = Path(self.locations[exit_location], 0)
             new_location.paths.append(exit_path)
 
-    def get_minimum_distance_to_key(self, start: int):
+    def get_minimum_time_to_key(self, start: int):
         """
         Function description:
-        Calculate the minimum distance to reach each key from a given start location.
+        Calculate the minimum time to reach each key from a given start location.
 
         :Input:
         start: int - index of the starting location
@@ -432,10 +432,10 @@ class FloorGraph:
     def find_location_to_grab_key(self, start: int, exits: List[int]) -> 'Key':
         """
         Function description:
-        Find the Location to grab a key to minimize time. First I'm going to get the minimum distance of each key from a start
+        Find the Location to grab a key to minimize time. First I'm going to get the minimum time of each key from a start
         location. Then I would add the time_to_reach of each location to the corresponding key. I then reset the graph because
         the time_to_reach for each location has been changed by the Djikstra's. Then I flip the graph and create a new location
-        that is connected to all exits with an edge of weight 0. Now I'm going to get the minimum distance of each key from the
+        that is connected to all exits with an edge of weight 0. Now I'm going to get the minimum time of each key from the
         new location. Then I would add the time_to_reach of each location from the new location to the corresponding key.
         I then find a key that has the minimum combination of time to reach from start, time to reach from the new location,
         and the time to fight monster of that key.
@@ -456,11 +456,11 @@ class FloorGraph:
         :Aux space complexity:
         O(N + E), where E is the number of exits
         """
-        self.get_minimum_distance_to_key(start)
+        self.get_minimum_time_to_key(start)
         self.reset()
         self.flip_graph()
         self.add_new_location(exits)
-        self.get_minimum_distance_to_key(len(self.locations) - 1)
+        self.get_minimum_time_to_key(len(self.locations) - 1)
         self.flip_graph()
         self.reset()
         return self.get_minimum_key()
@@ -509,7 +509,7 @@ class FloorGraph:
     def reset_keys(self):
         """
         Function description:
-        Reset the time_to_reach attribute of all keys.
+        Reset the time_to_reach_key attribute of all keys.
 
         :Input:
         None
@@ -531,7 +531,7 @@ class FloorGraph:
     def delete_new_location(self):
         """
         Function description:
-        Delete the new Location from the graph and all the edges connecting to it.
+        Delete the new Location that generated from add new location from the graph and all the edges connecting to it.
 
         :Input:
         None
