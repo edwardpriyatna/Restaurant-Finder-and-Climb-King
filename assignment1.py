@@ -220,7 +220,7 @@ class FloorGraph:
         because we are initializing each location and path
 
         :Aux space complexity:
-         O(|V| + |E|), because we are initializing each location and path
+        O(|V| + |E|), because we are initializing each location and path
         """
         for i in range(max(max(paths, key=lambda x: max(x[:2]))[:2]) + 1): #identifies the highest index of a location used in any path.
             self.add_location(Location(i)) # Adding 1 to the maximum index found ensures that there will be enough locations for all locations referenced in the paths.
@@ -243,12 +243,12 @@ class FloorGraph:
         Update the time_to_reach of each location
 
         :Time complexity:
-        The time complexity is O((|E|+|V|) log |V|) because each location is inserted into the priority queue once
+        The time complexity is O(|E| log(|V|)) because each location is inserted into the priority queue once
         (which costs O(log |V|) time), and for each path, we perform a decrease-key operation on the priority queue
-        (which also costs O(log |V|) time). So, the total time complexity is O((|E|+|V|) log |V|).
+        (which also costs O(log |V|) time). So, the total time complexity is O(|E| log(|V|)).
 
         :Aux space complexity:
-        O(|V|) because we need to store the locations in the priority queue. In the worst case, all locations will be
+        O(|V|+|E|) because we need to store the locations in the priority queue. In the worst case, all locations will be
         in the queue at once,
         """
         queue = []
@@ -282,11 +282,11 @@ class FloorGraph:
         Optional[List[int]], a list of Location indices representing the shortest path, or None if no path exists
 
         :Time complexity:
-        O((|E|+|V|) log |V|), runs Dijkstra’s algorithm, which has a time complexity of O((|E|+|V|) log |V|),
+        O(|E| log(|V|)), runs Dijkstra’s algorithm, which has a time complexity of O(|E| log(|V|)),
         then traces the shortest path from the end location to the start location, which has a time complexity of O(|V|).
 
         :Aux space complexity:
-        O(|V|), needs to store the locations in the priority queue for Dijkstra’s algorithm (which takes O(|V|) space),
+        O(|V|+|E|), needs to store the locations in the priority queue for Dijkstra’s algorithm (which takes O(|V|) space),
         and it needs to store the shortest path (which also takes O(|V|) space in the worst case).
         """
         start_location = self.locations[start_index]
@@ -314,7 +314,7 @@ class FloorGraph:
         None
 
         :Output, return or postcondition:
-        None
+        Reset the visited, discovered, time_to_reach,and previous_location attributes of all locations in the graph.
 
         :Time complexity:
         O(|V|), where |V| is the number of locations in the graph. Needs to reset each location in the graph.
@@ -340,13 +340,12 @@ class FloorGraph:
         All the paths are now flipped.
 
         :Time complexity:
-        O(|V| + |E|), where |V| is the number of locations and |E| is the number of paths in the graph.
+        O(|V|+|E|), where |V| is the number of locations and |E| is the number of paths in the graph.
         Needs to create a new location for each location in the original graph (which takes O(|V|) time).
         Then create a new path for each path in the original graph (which takes O(|E|) time).
 
         :Aux space complexity:
-        Auxiliary Space Complexity: O(|V| + |E|), creates a new graph with the same number of locations
-        and paths as the original graph.
+        O(|V| + |E|), creates a new graph with the same number of locations and paths as the original graph.
         """
         flipped_locations = [Location(i) for i in range(len(self.locations))]
 
@@ -395,13 +394,13 @@ class FloorGraph:
         Update the time to reach for each key based on the time to reach the location where the key is at.
 
         :Time complexity:
-        O((|E|+|V|) log |V|). But originally O((|E|+|V|) log |V| + |K|), where |E| is the number of edges, |V| is the
+        O(|E|log(|V|)+|V|). But originally O(|E| log(|V|)+|V|+|K|), where |E| is the number of edges, |V| is the
         number of vertices, and |K| is the number of keys. This is because it runs Dijkstra’s algorithm, which has a
-        time complexity of O((|E|+|V|) log |V|), and then updates the time to reach each key, which takes O(|K|) time.
+        time complexity of O(|E| log(|V|)), and then updates the time to reach each key, which takes O(|K|) time.
         But there are at most |V| keys.
 
         :Aux space complexity:
-        O(|V|), as it needs to store the vertices in the priority queue for Dijkstra’s algorithm.
+        O(|V|+|E|), as it runs Dijkstra’s algorithm.
         """
         self.dijkstra(self.locations[start])
 
@@ -448,10 +447,10 @@ class FloorGraph:
         Key: the Key object representing the optimal location to grab a key
 
         :Time complexity:
-        Time Complexity: O((|E|+|V|) log |V|), O((|E|+|V|) log |V| + |K|), where |E| is the number of edges, |V| is the
+        Time Complexity: O(|E|log(|V|)+|V|), O(|E| log(|V|) + |K|), where |E| is the number of edges, |V| is the
         number of vertices, and |K| is the number of keys. This is because it runs Dijkstra’s algorithm twice,
-        which has a time complexity  of O((|E|+|V|) log |V|) each time, and then finds the minimum key, which takes O(K) time.
-        But there are at most |V| keys so the complexity becomes O((|E|+|V|) log |V|)
+        which has a time complexity  of O(|E| log(|V|)) each time, and then finds the minimum key, which takes O(K) time.
+        But there are at most |V| keys so the complexity becomes O(|E| log(|V|)+|V|)
 
         :Aux space complexity:
         O(N + E), where E is the number of exits
@@ -480,12 +479,12 @@ class FloorGraph:
         or None if no route is found
 
         :Time complexity:
-        Getting the shortest path also uses Dijkstra’s algorithm, so its time complexity is O((V+E)logV). Resetting the keys
-        and resetting the graph both have a time complexity of O(V). Therefore, the overall time complexity of climb is
-        O((V+E)logV).
+        Getting the shortest path uses Dijkstra’s algorithm, so its time complexity is O(|E|log(|V|)). Resetting the graph,
+        delete new location, and resetting weight all have time complexity of O(|V|). Therefore, the overall time complexity
+        of climb is O(|E|log(|V|)+|V|).
 
         :Aux space complexity:
-        O(N + E), where E is the number of exits
+        O(|V|+|E|), from running Djikstra's, resetting graph, deleting new location, and resetting keys.
         """
         location_to_grab_key = self.find_location_to_grab_key(start, exits)
         route_part1 = self.get_shortest_path(start, location_to_grab_key.k)
