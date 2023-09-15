@@ -176,9 +176,41 @@ class FloorGraph:
         self.construct_graph(paths, keys)
 
     def add_location(self, location: 'Location'):
+        """
+        Function description:
+        Add a location to the locations list inside class Graph.
+
+        :Input:
+        Location: Location object, the location we want to add
+
+        :Output, return or postcondition:
+        Add location to locations
+
+        :Time complexity:
+        O(1)
+
+        :Aux space complexity:
+        O(1)
+        """
         self.locations.append(location)
 
     def add_key(self, key: 'Key'):
+        """
+        Function description:
+        Add a key to the keys lust.
+
+        :Input:
+        key: Key object, the key we want to add
+
+        :Output, return or postcondition:
+        Add key to keys
+
+        :Time complexity:
+        O(1)
+
+        :Aux space complexity:
+        O(1)
+        """
         self.keys.append(key)
 
     def add_path(self, u: int, v: int, x: int):
@@ -408,26 +440,6 @@ class FloorGraph:
             location = self.locations[key.k]
             key.time_to_reach_key += location.time_to_reach
 
-    def get_minimum_key(self) -> 'Key':
-        """
-        Function description:
-        Find the Key object with the minimum time_to_reach_key + y value.
-
-        :Input:
-        None
-
-        :Output, return or postcondition:
-        Key: the Key object with the minimum time_to_reach_key + y
-
-        :Time complexity:
-        O(|V|). But originally O(|K|), where |K| is the number of keys. Needs to iterate over all keys to find the minimum.
-        But there is at most |V| keys so complexity is O(|V|).
-
-        :Aux space complexity:
-        O(1), does not use any additional space.
-        """
-        return min(self.keys, key=lambda key: key.time_to_reach_key + key.y)
-
     def find_location_to_grab_key(self, start: int, exits: List[int]) -> 'Key':
         """
         Function description:
@@ -447,13 +459,13 @@ class FloorGraph:
         Key: the Key object representing the optimal location to grab a key
 
         :Time complexity:
-        Time Complexity: O(|E|log(|V|)+|V|), O(|E| log(|V|) + |K|), where |E| is the number of edges, |V| is the
-        number of vertices, and |K| is the number of keys. This is because it runs Dijkstra’s algorithm twice,
-        which has a time complexity  of O(|E| log(|V|)) each time, and then finds the minimum key, which takes O(K) time.
+        Time Complexity: O(|E|log(|V|)+|V|), originally O(|E| log(|V|) + |K|), where |E| is the number of edges, |V|
+        is the number of vertices, and |K| is the number of keys. This is because it runs Dijkstra’s algorithm twice,
+        which has a time complexity  of O(|E| log(|V|)) each time, and then finds the minimum key, which takes O(|K|) time.
         But there are at most |V| keys so the complexity becomes O(|E| log(|V|)+|V|)
 
         :Aux space complexity:
-        O(N + E), where E is the number of exits
+        O(|V| + |E|), because it runs Djikstra's
         """
         self.get_minimum_time_to_key(start)
         self.reset()
@@ -462,7 +474,7 @@ class FloorGraph:
         self.get_minimum_time_to_key(len(self.locations) - 1)
         self.flip_graph()
         self.reset()
-        return self.get_minimum_key()
+        return min(self.keys, key=lambda key: key.time_to_reach_key + key.y)
 
     def climb(self, start: int, exits: List[int]) -> Optional[tuple]:
         """
