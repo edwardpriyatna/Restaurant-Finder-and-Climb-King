@@ -315,7 +315,7 @@ class FloorGraph:
 
         :Aux space complexity:
         O(|V|). But originally O(|N|), where |N| is the number of elements in the exits list.
-        Creates a new Path instance for each exit_location.But there is at most |V| exits.
+        Creates a new Path instance for each exit_location. But there is at most |V| exits, so the complexity is O(|V|).
         """
         new_location = Location(len(self.locations))
         self.locations.append(new_location)
@@ -363,7 +363,7 @@ class FloorGraph:
 
         :Time complexity:
         O(|V|). But originally O(|K|), where |K| is the number of keys. Needs to iterate over all keys to find the minimum.
-        But there is at most |V| keys.
+        But there is at most |V| keys so complexity is O(|V|).
 
         :Aux space complexity:
         O(1), does not use any additional space.
@@ -376,16 +376,17 @@ class FloorGraph:
         Find the Location to grab a key to minimize time. First I'm going to get the minimum distance of each key from a start
         location. Then I would add the time_to_reach of each location to the corresponding key. I then reset the graph because
         the time_to_reach for each location has been changed by the Djikstra's. Then I flip the graph and create a new location
-        that is connected to all exits with an edge of weight 0. Now I'm going to get the minimum distance of each key from the new location.
-        Then I would add the time_to_reach of each location from the new location
-        to the corresponding key.
+        that is connected to all exits with an edge of weight 0. Now I'm going to get the minimum distance of each key from the
+        new location. Then I would add the time_to_reach of each location from the new location to the corresponding key.
+        I then find a key that has the minimum combination of time to reach from start, time to reach from the new location,
+        and the time to fight monster of that key.
 
         :Input:
-        start: int - index of the starting key
-        exits: List[int] - list of indices of exit Locations
+        start: int, index of the starting key
+        exits: List[int], list of indices of exit Locations
 
         :Output, return or postcondition:
-        Key - the Key object representing the optimal location to grab a key
+        Key: the Key object representing the optimal location to grab a key
 
         :Time complexity:
         Time Complexity: O((|E|+|V|) log |V|), O((|E|+|V|) log |V| + |K|), where |E| is the number of edges, |V| is the
@@ -408,18 +409,21 @@ class FloorGraph:
     def climb(self, start: int, exits: List[int]) -> Optional[tuple]:
         """
         Function description:
-        Simulate climbing to find the optimal route.
-
+        Find the location to grab key from. Then get the shortest path from the start to the location to grab key from.
+        Then get the shortest path from the location to grab key from to the new location we created in add new location.
+        return the total time to get key and the combination of those two paths that we get.
         :Input:
         argv1: int - index of the starting key
         argv2: List[int] - list of indices of exit Locations
 
         :Output, return or postcondition:
-        Optional[tuple] - a tuple containing the total time and the list of Location indices representing the route,
-                          or None if no route is found
+        Tuple or none: a tuple containing the total time and the list of Location indices representing the route,
+        or None if no route is found
 
         :Time complexity:
-        O(N * log(N) + M), where N is the number of locations and M is the total number of paths
+        Getting the shortest path also uses Dijkstra’s algorithm, so its time complexity is O((V+E)logV). Resetting the keys
+        and resetting the graph both have a time complexity of O(V). Therefore, the overall time complexity of climb is
+        O((V+E)logV).
 
         :Aux space complexity:
         O(N + E), where E is the number of exits
@@ -432,7 +436,9 @@ class FloorGraph:
 
         self.reset()
         route_part2 = self.get_shortest_path(location_to_grab_key.k, len(self.locations) - 1)
-        route_part2.pop()  # pop the new location
+        if route_part2 is None:
+            return None
+        route_part2.pop()  # pop the new location from add new location
         total_time = location_to_grab_key.time_to_reach_key + location_to_grab_key.y
         route = route_part1 + route_part2
 
@@ -450,7 +456,7 @@ class FloorGraph:
         None
 
         :Output, return or postcondition:
-        None
+        Resets the time_to_reach for each key
 
         :Time complexity:
         O(|V|). But originally O(|K|) where |K| is the number of keys.
@@ -466,13 +472,13 @@ class FloorGraph:
     def delete_new_location(self):
         """
         Function description:
-        Delete the last added Location from the graph.
+        Delete the new Location from the graph and all the edges connecting to it.
 
         :Input:
         None
 
         :Output, return or postcondition:
-        None
+        Deletes the new Location from the graph and all the edges connecting to it.
 
         :Time complexity:
         O(|V| + |E|), where |V| is the number of vertices (locations) and |E| is the number of edges (paths).
@@ -481,8 +487,7 @@ class FloorGraph:
         deleted vertex (which takes O(|V| + |E|) time).
 
         :Aux space complexity:
-        O(|V| + |E|), as it creates a new list of edges for each vertex in the worst case.
-        Happens when every location in the graph has a path to the location being deleted.
+        O(1), does not use any additonal space.
         """
         new_location = self.locations.pop()
 
