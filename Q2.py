@@ -1,5 +1,6 @@
 import heapq
-from typing import List, Optional
+from typing import List, Optional, Tuple
+
 
 class Location:
     def __init__(self, ID: int):
@@ -45,6 +46,11 @@ class Location:
         """
         return self.time_to_reach < other.time_to_reach
 
+    def __str__(self) -> str:
+        return f"Vertex {self.ID}, visited {self.visited}, discovered {self.discovered}, " \
+               f"time_to_reach {self.time_to_reach}, edges {[str(path) for path in self.paths]}, " \
+               f"previous_vertex {self.previous_location.ID if self.previous_location else None}"
+
 
 class Path:
     def __init__(self, v: 'Location', x:int):
@@ -67,7 +73,8 @@ class Path:
         """
         self.v = v
         self.x = x
-
+    def __str__(self) -> str:
+        return f"Edge to {self.v.ID}, weight {self.x}"
 class Key:
     def __init__(self, k: int, y:int):
         """
@@ -90,10 +97,12 @@ class Key:
         self.k = k
         self.time_to_reach_key = 0
         self.y = y
-
+    def __str__(self) -> str:
+        return f"Weight of vertex {self.k} with distance to reach {self.time_to_reach_key} " \
+               f"and distance to get {self.y}"
 
 class FloorGraph:
-    def __init__(self, paths: List[List[int]], keys: List[List[int]]):
+    def __init__(self, paths: List[List[int]], keys: List[Tuple[int,int]]):
         """
         Function description:
         Initialize a FloorGraph object and construct the graph.
@@ -144,7 +153,7 @@ class FloorGraph:
         path_instance = Path(self.locations[v], x)
         self.locations[u].paths.append(path_instance)
 
-    def construct_graph(self, paths: List[List[int]], keys: List[List[int]]):
+    def construct_graph(self, paths: List[List[int]], keys: List[Tuple[int,int]]):
         """
         Function description:
         Construct the graph with the given paths and keys.
@@ -493,4 +502,28 @@ class FloorGraph:
 
         for location in self.locations:
             location.paths = [path for path in location.paths if path.v != new_location]
+
+    def __str__(self) -> str:
+        return "\n".join(str(location) for location in self.locations)
+
+if __name__ == '__main__':
+    # The paths represented as a list of tuples
+    paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2), (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4),
+             (7, 8, 2), (8, 7, 2), (7, 3, 2), (8, 0, 11), (4, 3, 1), (4, 8, 10)]
+    keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
+    graph = FloorGraph(paths, keys)
+
+    starts = [1, 7, 1, 1, 3]
+    exits = [[7, 2, 4], [8], [3, 4], [0, 4], [4]]
+    times = [9, 6, 10, 11, 20]
+    routes = [[1, 7], [7, 8], [1, 5, 6, 3], [1, 5, 6, 4], [3, 4, 8, 7, 3, 4]]
+
+    print(graph)
+    for key in graph.keys:
+        print(key)
+    graph.climb(1,[7,2,4])
+    print('graph after climb')
+    print(graph)
+    for key in graph.keys:
+        print(key)
 

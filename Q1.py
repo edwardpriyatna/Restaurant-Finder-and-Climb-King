@@ -60,3 +60,4 @@ def restaurantFinder(d: int, site_list: List[int]) -> Tuple[int, List[int]]:
                 selected_sites[i] = selected_sites[i-1].copy()
 
     return (total_revenue[-1], [site+1 for site in selected_sites[-1]])  # Convert to 1-indexed sites
+
