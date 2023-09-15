@@ -21,10 +21,15 @@ def restaurantFinder(d: int, site_list: List[int]) -> Tuple[int, List[int]]:
     - A list of the chosen sites (1-indexed).
 
     :Time complexity:
-    The time complexity of the function is O(N), where N is the number of potential sites.
+    O(N), where N is the number of potential sites. This is because the function makes a single pass over the list of potential sites.
+    For each site, it performs a constant amount of work. It makes comparisons and mathematical operations, and it may copy a list.
+    All these operations take constant time, so the total time complexity is proportional to the number of sites, hence O(N).
 
     :Aux space complexity:
-    The auxiliary space complexity of the function is also O(N).
+    O(N). The two lists total_revenue and selected_sites that the function maintains, each of which has a length of N.
+    These lists are used to store intermediate results during computation. total_revenue[i] stores the maximum total revenue
+    that can be obtained by considering the first i+1 sites, and selected_sites[i] stores the chosen sites that contribute to
+    this maximum revenue. Since these lists have a size proportional to the number of sites, the complexity is O(N).
     """
     N = len(site_list)
     total_revenue = [0]*N
