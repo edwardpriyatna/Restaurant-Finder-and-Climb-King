@@ -193,7 +193,7 @@ class FloorGraph:
         Update the time_to_reach of each location
 
         :Time complexity:
-        The time complexity is O((|E|+|V|) log |V|) because each location is inserted into the priority queue once
+        The time complexity is O(|E|log(|V|)) because each location is inserted into the priority queue once
         (which costs O(log |V|) time), and for each path, we perform a decrease-key operation on the priority queue
         (which also costs O(log |V|) time). So, the total time complexity is O((|E|+|V|) log |V|).
 

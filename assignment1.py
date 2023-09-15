@@ -240,7 +240,7 @@ class FloorGraph:
         path_instance = Path(self.locations[v], x)
         self.locations[u].paths.append(path_instance)
 
-    def construct_graph(self, paths: List[List[int]], keys: List[Tuple[int,int]]):
+    def construct_graph(self, paths: List[Tuple[int,int,int]], keys: List[Tuple[int,int]]):
         """
         Function description:
         Construct the graph with the given paths and keys.
@@ -501,7 +501,7 @@ class FloorGraph:
         of climb is O(|E|log(|V|)+|V|).
 
         :Aux space complexity:
-        O(|V|+|E|), from running Djikstra's, resetting graph, deleting new location, and resetting keys.
+        O(|V|+|E|), from running Djikstra's and deleting new location.
         """
         location_to_grab_key = self.find_location_to_grab_key(start, exits)
         route_part1 = self.get_shortest_path(start, location_to_grab_key.k)
