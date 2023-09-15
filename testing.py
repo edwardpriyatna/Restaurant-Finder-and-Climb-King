@@ -7,8 +7,7 @@
 """
 
 import unittest
-from Q1 import restaurantFinder
-from Q2 import *
+from assignment1 import restaurantFinder, FloorGraph
 
 # Question 1: Fast Food Chain
 
@@ -416,6 +415,38 @@ class TestingQ2(unittest.TestCase):
         # testing
         self.assertEqual(total_time, 10)
         self.assertIn(route, [[0], [0, 1, 2, 3]])
+
+    def test_17(self):
+        # initialising test
+        paths = [(0, 1, 1), (1, 0, 1), (1, 2, 1), (2, 3, 1), (3, 4, 1), (4, 1, 1)]
+        keys = [(0, 2)]
+        graph = FloorGraph(paths, keys)
+        start = 2
+        exits = [3]
+        total_time, route = graph.climb(start, exits)
+
+        # testing
+        self.assertEqual(total_time, 9)
+        self.assertEqual(route, [2, 3, 4, 1, 0, 1, 2, 3])
+
+    def test_18(self):
+        # initialising test
+        paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2), (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4),
+                 (7, 8, 2), (8, 7, 2), (7, 3, 2), (8, 0, 11), (4, 3, 1), (4, 8, 10)]
+        keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
+        graph = FloorGraph(paths, keys)
+
+        starts = [1, 7, 1, 1, 3]
+        exits = [[7, 2, 4], [8], [3, 4], [0, 4], [4]]
+        times = [9, 6, 10, 11, 20]
+        routes = [[1, 7], [7, 8], [1, 5, 6, 3], [1, 5, 6, 4], [3, 4, 8, 7, 3, 4]]
+
+        for i in range(5):
+            total_time, route = graph.climb(starts[i], exits[i])
+
+            # testing
+            self.assertEqual(total_time, times[i])
+            self.assertEqual(route, routes[i])
 
 # Run Tests
 

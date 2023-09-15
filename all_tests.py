@@ -1,6 +1,5 @@
 from functools import total_ordering
-from Q1 import restaurantFinder
-from Q2 import FloorGraph
+from assignment1 import FloorGraph, restaurantFinder
 import unittest
 
 class TestRestaurantFinder(unittest.TestCase):
@@ -682,7 +681,7 @@ class TestClimbKing(unittest.TestCase):
 
         outcome = graph.climb(start, exits)
         self.assertEqual(outcome, None)
-
+        
 if __name__ == '__main__':
 
  unittest.main()
