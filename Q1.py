@@ -1,45 +1,62 @@
 from typing import List, Tuple
 
-def restaurantFinder(min_distance: int, site_revenues: List[int]) -> Tuple[int, List[int]]:
-    num_sites = len(site_revenues)
-    max_revenue = [0]*num_sites
-    prev_site = [0]*num_sites
-    chosen_sites = [0]*num_sites
+def restaurantFinder(d: int, site_list: List[int]) -> Tuple[int, List[int]]:
+    """
+    Function description:
+    This function helps a fast food chain to choose the sites to open restaurants such that no two restaurants are
+    within a certain distance of each other and the overall revenue is maximised.
+
+    Approach description:
+    The function uses dynamic programming to solve this problem. It maintains an array `max_revenue` to store the maximum
+    revenue that can be obtained for each site, and an array `chosen_sites` to store the chosen sites that contribute to the
+    maximum revenue.
+
+    :Input:
+    d: The minimum distance between any two chosen sites.
+    site_list: A list of revenues for each site.
+
+    :Output, return or postcondition:
+    The function returns a tuple with two elements:
+    - The maximum total revenue that can be obtained.
+    - A list of the chosen sites (1-indexed).
+
+    :Time complexity:
+    The time complexity of the function is O(N), where N is the number of potential sites.
+
+    :Aux space complexity:
+    The auxiliary space complexity of the function is also O(N).
+    """
+    N = len(site_list)
+    total_revenue = [0]*N
+    selected_sites = [0]*N
 
     # Initialize base cases
-    max_revenue[0] = site_revenues[0] if site_revenues[0] > 0 else 0
-    chosen_sites[0] = [0] if site_revenues[0] > 0 else []
+    total_revenue[0] = site_list[0] if site_list[0] > 0 else 0
+    selected_sites[0] = [0] if site_list[0] > 0 else []
 
-    for i in range(1, num_sites):
-        # If no restaurant within min_distance km, consider the current site
-        if i < min_distance:
-            if site_revenues[i] > max_revenue[i-1]:
-                max_revenue[i] = site_revenues[i]
-                chosen_sites[i] = [i]
+    for i in range(1, N):
+        # If no restaurant within d km, consider the current site
+        if i < d:
+            if site_list[i] > total_revenue[i-1]:
+                total_revenue[i] = site_list[i]
+                selected_sites[i] = [i]
             else:
-                max_revenue[i] = max_revenue[i-1]
-                chosen_sites[i] = chosen_sites[i-1].copy()
+                total_revenue[i] = total_revenue[i-1]
+                selected_sites[i] = selected_sites[i-1].copy()
         else:
-            # Consider the current site and the maximum revenue from sites that are at least min_distance km away
-            include_site = site_revenues[i] + (max_revenue[i-min_distance-1] if i-min_distance-1 >= 0 else 0)
-            exclude_site = max_revenue[i-1]
+            # Consider the current site and the maximum revenue from sites that are at least d km away
+            include_site = site_list[i] + (total_revenue[i-d-1] if i-d-1 >= 0 else 0)
+            exclude_site = total_revenue[i-1]
 
             if include_site > exclude_site:
-                max_revenue[i] = include_site
-                if i-min_distance-1 >= 0:
-                    chosen_sites[i] = chosen_sites[i-min_distance-1].copy()
+                total_revenue[i] = include_site
+                if i-d-1 >= 0:
+                    selected_sites[i] = selected_sites[i-d-1].copy()
                 else:
-                    chosen_sites[i] = []
-                chosen_sites[i].append(i)
+                    selected_sites[i] = []
+                selected_sites[i].append(i)
             else:
-                max_revenue[i] = exclude_site
-                chosen_sites[i] = chosen_sites[i-1].copy()
+                total_revenue[i] = exclude_site
+                selected_sites[i] = selected_sites[i-1].copy()
 
-    return (max_revenue[-1], [site+1 for site in chosen_sites[-1]])  # Convert to 1-indexed sites
-
-if __name__ == "__main__":
-    print(restaurantFinder(1,[50, 10, 12, 65, 40, 95, 100, 12, 20, 30]))
-    print(restaurantFinder(2,[50, 10, 12, 65, 40, 95, 100, 12, 20, 30]))
-    print( restaurantFinder(3,[50, 10, 12, 65, 40, 95, 100, 12, 20, 30]))
-    print(restaurantFinder(7,[50, 10, 12, 65, 40, 95, 100, 12, 20, 30]))
-    print(restaurantFinder(0,[50, 10, 12, 65, 40, 95, 100, 12, 20, 30]))
+    return (total_revenue[-1], [site+1 for site in selected_sites[-1]])  # Convert to 1-indexed sites
