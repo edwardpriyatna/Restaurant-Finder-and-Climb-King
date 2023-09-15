@@ -451,9 +451,9 @@ class FloorGraph:
         total_time = location_to_grab_key.time_to_reach_key + location_to_grab_key.y
         route = route_part1 + route_part2
 
-        self.reset_keys()
         self.reset()
         self.delete_new_location()
+        self.reset_keys()
         return total_time, route
 
     def reset_keys(self):
@@ -476,7 +476,7 @@ class FloorGraph:
         O(1), as it does not use any additional space.
         """
         for key in self.keys:
-            key.time_to_reach = 0
+            key.time_to_reach_key = 0
 
     def delete_new_location(self):
         """
@@ -518,12 +518,9 @@ if __name__ == '__main__':
     times = [9, 6, 10, 11, 20]
     routes = [[1, 7], [7, 8], [1, 5, 6, 3], [1, 5, 6, 4], [3, 4, 8, 7, 3, 4]]
 
-    print(graph)
-    for key in graph.keys:
-        print(key)
-    graph.climb(1,[7,2,4])
-    print('graph after climb')
-    print(graph)
-    for key in graph.keys:
-        print(key)
+    for i in range(5):
+        total_time, route = graph.climb(starts[i], exits[i])
+        # testing
+        print('total time',total_time)
+        print('route',route)
 

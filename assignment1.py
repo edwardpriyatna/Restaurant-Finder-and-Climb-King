@@ -61,6 +61,7 @@ def restaurantFinder(d: int, site_list: List[int]) -> Tuple[int, List[int]]:
 
     return (total_revenue[-1], [site+1 for site in selected_sites[-1]])  # Convert to 1-indexed sites
 
+
 class Location:
     def __init__(self, ID: int):
         """
@@ -104,7 +105,6 @@ class Location:
         O(1)
         """
         return self.time_to_reach < other.time_to_reach
-
 
 class Path:
     def __init__(self, v: 'Location', x:int):
@@ -151,9 +151,8 @@ class Key:
         self.time_to_reach_key = 0
         self.y = y
 
-
 class FloorGraph:
-    def __init__(self, paths: List[List[int]], keys: List[List[int]]):
+    def __init__(self, paths: List[List[int]], keys: List[Tuple[int,int]]):
         """
         Function description:
         Initialize a FloorGraph object and construct the graph.
@@ -204,7 +203,7 @@ class FloorGraph:
         path_instance = Path(self.locations[v], x)
         self.locations[u].paths.append(path_instance)
 
-    def construct_graph(self, paths: List[List[int]], keys: List[List[int]]):
+    def construct_graph(self, paths: List[List[int]], keys: List[Tuple[int,int]]):
         """
         Function description:
         Construct the graph with the given paths and keys.
@@ -502,9 +501,9 @@ class FloorGraph:
         total_time = location_to_grab_key.time_to_reach_key + location_to_grab_key.y
         route = route_part1 + route_part2
 
-        self.reset_keys()
         self.reset()
         self.delete_new_location()
+        self.reset_keys()
         return total_time, route
 
     def reset_keys(self):
@@ -527,7 +526,7 @@ class FloorGraph:
         O(1), as it does not use any additional space.
         """
         for key in self.keys:
-            key.time_to_reach = 0
+            key.time_to_reach_key = 0
 
     def delete_new_location(self):
         """
@@ -553,4 +552,7 @@ class FloorGraph:
 
         for location in self.locations:
             location.paths = [path for path in location.paths if path.v != new_location]
+
+
+
 
