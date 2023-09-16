@@ -285,7 +285,7 @@ class FloorGraph:
     def dijkstra(self, start_location:'Location'):
         """
         Function description:
-        Perform Dijkstra's algorithm using heapq to find the shortest paths in the graph.
+        Perform Dijkstra's algorithm using heapq to update the time_to_reach for each location.
 
         :Input:
         start_location: the starting Location for Dijkstra's algorithm
@@ -295,8 +295,8 @@ class FloorGraph:
 
         :Time complexity:
         O(|E| log(|V|)). |V| is the number of locations and |E| is the total number of paths. Because each location is inserted
-        into the priority queue once (which costs O(log |V|) time), and for each path, we perform a decrease-key operation on the
-        priority queue (which also costs O(log |V|) time). So, the total time complexity is O(|E| log(|V|)).
+        into the priority queue once which costs O(log |V|) time, and for each path, we perform a decrease-key operation on
+        the heap which also costs O(log |V|) time. So, the total time complexity is O(|E| log(|V|)).
 
         :Aux space complexity:
         O(|V|+|E|) because we need to store the locations in the priority queue. In the worst case, all locations will be
@@ -483,13 +483,9 @@ class FloorGraph:
         self.reset()
         self.flip_graph()
         self.add_new_location(exits)
-        print('graph befroe eset')
-        print(self)
         self.get_minimum_time_to_key(len(self.locations) - 1)
         self.flip_graph() #also flips the connections to the new location which would be beneficial in climb
         self.reset()
-        print('graph after reset')
-        print(self)
         return min(self.keys, key=lambda key: key.time_to_reach_key + key.y)
 
     def climb(self, start: int, exits: List[int]) -> Optional[tuple]:
@@ -507,8 +503,9 @@ class FloorGraph:
         or None if no route is found
 
         :Time complexity:
-        O(|E|log(|V|)), Getting the shortest path uses Dijkstra’s algorithm, so its time complexity is O(|E|log(|V|)). Resetting the graph,
-        delete new location, and resetting weight all have time complexity of O(|V|). So, the time complexity is O(|E|log(|V|)).
+        O(|E|log(|V|)), Getting the shortest path uses Dijkstra’s algorithm, so its time complexity is O(|E|log(|V|)).
+        Resetting the graph, delete new location, and resetting weight all have time complexity of O(|V|). So, the time
+        complexity is O(|E|log(|V|)).
 
         :Aux space complexity:
         O(|V|+|E|), from running Djikstra's and deleting new location.

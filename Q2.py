@@ -184,7 +184,7 @@ class FloorGraph:
     def dijkstra(self, start_location:'Location'):
         """
         Function description:
-        Perform Dijkstra's algorithm using heapq to find the shortest paths in the graph.
+        Perform Dijkstra's algorithm using heapq to update the time_to_reach for each location.
 
         :Input:
         start_location: the starting Location for Dijkstra's algorithm
