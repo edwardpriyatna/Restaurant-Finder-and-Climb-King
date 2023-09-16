@@ -164,7 +164,7 @@ class FloorGraph:
         :Input:
         paths: List[Tuple[int,int,int]], list of paths represented as [u, v, x]. u is the source, v is the destination,
         and x is the travel time
-        keys: List[List[int]], list of keys represented as [k, y]
+        keys: List[List[int,int]], list of keys represented as [k, y]
 
         :Output, return or postcondition:
         Initialize the FloorGraph object
@@ -245,7 +245,7 @@ class FloorGraph:
         Construct the graph with the given paths and keys.
 
         :Input:
-        paths: List[Tuple[int,int,int]], list of paths represented as [from_k, v_index, x]
+        paths: List[Tuple[int,int,int]], list of paths represented as [u, v, x]
         keys: List[Tuple[int,int]], list of keys represented as [k, y]
 
         :Output, return or postcondition:
@@ -268,13 +268,13 @@ class FloorGraph:
         for path in paths:
             self.add_path(*path)
 
-    def dijkstra(self, start_location:'Location'):
+    def dijkstra(self, start_index:int):
         """
         Function description:
         Perform Dijkstra's algorithm using heapq to update the time_to_reach for each location.
 
         :Input:
-        start_location: the starting Location for Dijkstra's algorithm
+        start_index: int, the starting location index for Dijkstra's algorithm
 
         :Output, return or postcondition:
         Update the time_to_reach of each location
@@ -288,6 +288,7 @@ class FloorGraph:
         O(|V|+|E|) because we need to store the locations in the priority queue. In the worst case, all locations will
         be in the queue at once.
         """
+        start_location=self.locations[start_index]
         queue = []
         start_location.time_to_reach = 0
         heapq.heappush(queue, start_location)
@@ -324,9 +325,8 @@ class FloorGraph:
         :Aux space complexity:
         O(|V|+|E|), needs to run Dijkstra's.
         """
-        start_location = self.locations[start_index]
         end_location = self.locations[end_index]
-        self.dijkstra(start_location)
+        self.dijkstra(start_index)
         if end_location.time_to_reach == float('inf'):
             return None
         path = []
@@ -415,13 +415,13 @@ class FloorGraph:
             exit_path = Path(self.locations[exit_location], 0)
             new_location.paths.append(exit_path)
 
-    def get_minimum_time_to_key(self, start: int):
+    def get_minimum_time_to_key(self, start_index: int):
         """
         Function description:
         Calculate the minimum time to reach each key from a given start location.
 
         :Input:
-        start: int - index of the starting location
+        start_index: int - index of the starting location
 
         :Output, return or postcondition:
         Update the time to reach for each key based on the time to reach the location where the key is at.
@@ -433,7 +433,7 @@ class FloorGraph:
         :Aux space complexity:
         O(|V|+|E|), as it runs Dijkstra’s algorithm.
         """
-        self.dijkstra(self.locations[start])
+        self.dijkstra(start_index)
 
         for key in self.keys:
             location = self.locations[key.k]
