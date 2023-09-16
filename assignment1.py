@@ -111,6 +111,11 @@ class Location:
         """
         return self.time_to_reach < other.time_to_reach
 
+    def __str__(self) -> str:
+        return f"Vertex {self.ID}, visited {self.visited}, discovered {self.discovered}, " \
+               f"time_to_reach {self.time_to_reach}, edges {[str(path) for path in self.paths]}, " \
+               f"previous_vertex {self.previous_location.ID if self.previous_location else None}"
+
 class Path:
     def __init__(self, v: 'Location', x:int):
         """
@@ -133,6 +138,8 @@ class Path:
         self.v = v
         self.x = x
 
+    def __str__(self) -> str:
+        return f"Edge to {self.v.ID}, weight {self.x}"
 class Key:
     def __init__(self, k: int, y:int):
         """
@@ -156,6 +163,9 @@ class Key:
         self.time_to_reach_key = 0
         self.y = y
 
+    def __str__(self) -> str:
+        return f"Weight of vertex {self.k} with distance to reach {self.time_to_reach_key} " \
+               f"and distance to get {self.y}"
 class FloorGraph:
     def __init__(self, paths: List[Tuple[int,int,int]], keys: List[Tuple[int,int]]):
         """
@@ -282,7 +292,7 @@ class FloorGraph:
 
         :Time complexity:
         O(|E| log(|V|)). |V| is the number of locations and |E| is the total number of paths. Because each location is inserted
-        into the priority queue once which costs O(log |V|) time, and for each path, we perform a decrease-key operation on
+        into the priority queue once which costs O(log |V|) time. For each path, we perform a decrease-key operation on
         the heap which also costs O(log |V|) time. So, the total time complexity is O(|E| log(|V|)).
 
         :Aux space complexity:
@@ -402,12 +412,12 @@ class FloorGraph:
         Adds a new location that is connected to all exits by paths with travel_time 0.
 
         :Time complexity:
-        O(|V|). But originally O(|N|), where |N| is the number of elements in the exits list.
-        For each exit, connect the new location to that exit. But there is at most |V| exits.
+        O(|V|). |V| is the number of locations. For each exit, connect the new location to that exit.
+        But there is at most |V| exits.
 
         :Aux space complexity:
-        O(|V|). But originally O(|N|), where |N| is the number of elements in the exits list.
-        Creates a new Path instance for each exit_location. But there is at most |V| exits, so the complexity is O(|V|).
+        O(|V|). Creates a new Path instance for each exit_location. But there is at most |V| exits, so the
+        complexity is O(|V|).
         """
         new_location = Location(len(self.locations))
         self.locations.append(new_location)
@@ -558,8 +568,23 @@ class FloorGraph:
         """
         new_location = self.locations.pop()
 
-        for location in self.locations:
+        for location in self.locations: #deleting all connections to the new location
             location.paths = [path for path in location.paths if path.v != new_location]
+
+    def __str__(self) -> str:
+        return "\n".join(str(location) for location in self.locations)
+
+if __name__ == '__main__':
+    # The paths represented as a list of tuples
+    paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2),
+             (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4), (7, 8, 2),
+             (8, 7, 2), (7, 3, 2), (8, 0, 11), (4, 3, 1), (4, 8, 10)]
+    # The keys represented as a list of tuples
+    keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
+    # Creating a FloorGraph object based on the given paths
+    myfloor = FloorGraph(paths, keys)
+    start = 1
+    exits = [3, 4]
 
 
 
