@@ -485,7 +485,7 @@ class FloorGraph:
         print('graph befroe eset')
         print(self)
         self.get_minimum_time_to_key(len(self.locations) - 1)
-        self.flip_graph()
+        self.flip_graph() #also flips the connections to the new location which would be beneficial in climb
         self.reset()
         print('graph after reset')
         print(self)
