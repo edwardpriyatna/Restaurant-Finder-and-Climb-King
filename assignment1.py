@@ -111,6 +111,12 @@ class Location:
         """
         return self.time_to_reach < other.time_to_reach
 
+    def __str__(self) -> str:
+        return f"Vertex {self.ID}, visited {self.visited}, discovered {self.discovered}, " \
+               f"time_to_reach {self.time_to_reach}, edges {[str(path) for path in self.paths]}, " \
+               f"previous_vertex {self.previous_location.ID if self.previous_location else None}"
+
+
 class Path:
     def __init__(self, v: 'Location', x:int):
         """
@@ -132,6 +138,9 @@ class Path:
         """
         self.v = v
         self.x = x
+
+    def __str__(self) -> str:
+        return f"Edge to {self.v.ID}, weight {self.x}"
 
 class Key:
     def __init__(self, k: int, y:int):
@@ -156,14 +165,18 @@ class Key:
         self.time_to_reach_key = 0
         self.y = y
 
+    def __str__(self) -> str:
+        return f"Weight of vertex {self.k} with distance to reach {self.time_to_reach_key} " \
+               f"and distance to get {self.y}"
+
 class FloorGraph:
-    def __init__(self, paths: List[List[int]], keys: List[Tuple[int,int]]):
+    def __init__(self, paths: List[Tuple[int,int,int]], keys: List[Tuple[int,int]]):
         """
         Function description:
         Initialize a FloorGraph object and construct the graph.
 
         :Input:
-        paths: List[List[int]], list of paths represented as [u, v, x]. u is the source, v is the destination, and
+        paths: List[Tuple[int,int,int]], list of paths represented as [u, v, x]. u is the source, v is the destination, and
         x is the travel time
         keys: List[List[int]], list of keys represented as [k, y]
 
@@ -246,8 +259,8 @@ class FloorGraph:
         Construct the graph with the given paths and keys.
 
         :Input:
-        paths: List[List[int]], list of paths represented as [from_k, v_index, x]
-        keys: List[List[int]], list of keys represented as [k, y]
+        paths: List[Tuple[int,int,int]], list of paths represented as [from_k, v_index, x]
+        keys: List[Tuple[int,int]], list of keys represented as [k, y]
 
         :Output, return or postcondition:
         construct the graph and initialize Key objects
@@ -260,7 +273,8 @@ class FloorGraph:
         O(|V| + |E|), because we are initializing each location and path
         """
         for i in range(max(max(paths, key=lambda x: max(x[:2]))[:2]) + 1): #identifies the highest index of a location used in any path.
-            self.add_location(Location(i)) # Adding 1 to the maximum index found ensures that there will be enough locations for all locations referenced in the paths.
+            self.add_location(Location(i)) # Adding 1 to the maximum index found ensures that there will be enough locations for
+            # all locations referenced in the paths.
 
         for key in keys:
             self.add_key(Key(key[0], key[1]))
@@ -280,13 +294,13 @@ class FloorGraph:
         Update the time_to_reach of each location
 
         :Time complexity:
-        The time complexity is O(|E| log(|V|)) because each location is inserted into the priority queue once
-        (which costs O(log |V|) time), and for each path, we perform a decrease-key operation on the priority queue
-        (which also costs O(log |V|) time). So, the total time complexity is O(|E| log(|V|)).
+        O(|E| log(|V|)). |V| is the number of locations and |E| is the total number of paths. Because each location is inserted
+        into the priority queue once (which costs O(log |V|) time), and for each path, we perform a decrease-key operation on the
+        priority queue (which also costs O(log |V|) time). So, the total time complexity is O(|E| log(|V|)).
 
         :Aux space complexity:
         O(|V|+|E|) because we need to store the locations in the priority queue. In the worst case, all locations will be
-        in the queue at once,
+        in the queue at once.
         """
         queue = []
         start_location.time_to_reach = 0
@@ -319,8 +333,7 @@ class FloorGraph:
         Optional[List[int]], a list of Location indices representing the shortest path, or None if no path exists
 
         :Time complexity:
-        O(|E| log(|V|)), runs Dijkstra’s algorithm, which has a time complexity of O(|E| log(|V|)). |V| can be ignored
-        because it doesn't scale as much |E|LOG(|V|).
+        O(|E| log(|V|)), runs Dijkstra’s algorithm, which has a time complexity of O(|E| log(|V|)).
 
         :Aux space complexity:
         O(|V|+|E|), needs to store the locations in the priority queue for Dijkstra’s algorithm (which takes O(|V|) space),
@@ -428,10 +441,8 @@ class FloorGraph:
         Update the time to reach for each key based on the time to reach the location where the key is at.
 
         :Time complexity:
-        O(|E|log(|V|)+|V|). But originally O(|E| log(|V|)+|V|+|K|), where |E| is the number of edges, |V| is the
-        number of vertices, and |K| is the number of keys. This is because it runs Dijkstra’s algorithm, which has a
-        time complexity of O(|E| log(|V|)), and then updates the time to reach each key, which takes O(|K|) time.
-        But there are at most |V| keys.
+        O(|E|log(|V|)). Where |E| is the number of edges and |V| is the number of vertices. Runs Dijkstra’s algorithm,
+        which has a time complexity of O(|E| log(|V|)), and then updates the time to reach each key, which takes O(|V|) time.
 
         :Aux space complexity:
         O(|V|+|E|), as it runs Dijkstra’s algorithm.
@@ -461,10 +472,9 @@ class FloorGraph:
         Key: the Key object representing the optimal location to grab a key
 
         :Time complexity:
-        Time Complexity: O(|E|log(|V|)+|V|), originally O(|E| log(|V|) + |K|), where |E| is the number of edges, |V|
-        is the number of vertices, and |K| is the number of keys. This is because it runs Dijkstra’s algorithm twice,
-        which has a time complexity  of O(|E| log(|V|)) each time, and then finds the minimum key, which takes O(|K|) time.
-        But there are at most |V| keys so the complexity becomes O(|E| log(|V|)+|V|)
+        Time Complexity: O(|E|log(|V|)), where |E| is the number of edges, |V| is the number of vertices. This is because it
+        runs Dijkstra’s algorithm twice, with time complexity  of O(|E| log(|V|)) each time, and then finds the minimum key,
+        which takes O(|V|) time.
 
         :Aux space complexity:
         O(|V| + |E|), because it runs Djikstra's
@@ -493,9 +503,8 @@ class FloorGraph:
         or None if no route is found
 
         :Time complexity:
-        Getting the shortest path uses Dijkstra’s algorithm, so its time complexity is O(|E|log(|V|)). Resetting the graph,
-        delete new location, and resetting weight all have time complexity of O(|V|). Therefore, the overall time complexity
-        of climb is O(|E|log(|V|)+|V|).
+        O(|E|log(|V|)), Getting the shortest path uses Dijkstra’s algorithm, so its time complexity is O(|E|log(|V|)). Resetting the graph,
+        delete new location, and resetting weight all have time complexity of O(|V|). So, the time complexity is O(|E|log(|V|)).
 
         :Aux space complexity:
         O(|V|+|E|), from running Djikstra's and deleting new location.
@@ -507,7 +516,7 @@ class FloorGraph:
         route_part1.pop()  # pop the location where the key is grabbed
 
         self.reset()
-        route_part2 = self.get_shortest_path(location_to_grab_key.k, len(self.locations) - 1)
+        route_part2 = self.get_shortest_path(location_to_grab_key.k, len(self.locations) - 1) #getting shortest path to new location
         if route_part2 is None:
             return None
         route_part2.pop()  # pop the new location from add new location
@@ -566,6 +575,9 @@ class FloorGraph:
         for location in self.locations:
             location.paths = [path for path in location.paths if path.v != new_location]
 
+    def __str__(self) -> str:
+        return "\n".join(str(location) for location in self.locations)
+
 if __name__ == '__main__':
     # The paths represented as a list of tuples
     paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2),
@@ -577,6 +589,7 @@ if __name__ == '__main__':
     myfloor = FloorGraph(paths, keys)
     start = 1
     exits = [3, 4]
-    print(myfloor.get_shortest_path(1,6))
+    print(myfloor.climb(start,exits))
+    print(myfloor)
 
 

@@ -51,7 +51,6 @@ class Location:
                f"time_to_reach {self.time_to_reach}, edges {[str(path) for path in self.paths]}, " \
                f"previous_vertex {self.previous_location.ID if self.previous_location else None}"
 
-
 class Path:
     def __init__(self, v: 'Location', x:int):
         """
@@ -75,6 +74,7 @@ class Path:
         self.x = x
     def __str__(self) -> str:
         return f"Edge to {self.v.ID}, weight {self.x}"
+
 class Key:
     def __init__(self, k: int, y:int):
         """
@@ -102,7 +102,7 @@ class Key:
                f"and distance to get {self.y}"
 
 class FloorGraph:
-    def __init__(self, paths: List[List[int]], keys: List[Tuple[int,int]]):
+    def __init__(self, paths: List[Tuple[int,int,int]], keys: List[Tuple[int,int]]):
         """
         Function description:
         Initialize a FloorGraph object and construct the graph.
