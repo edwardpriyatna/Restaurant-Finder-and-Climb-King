@@ -182,28 +182,6 @@ class FloorGraph:
         self.keys = []
         self.construct_graph(paths, keys)
 
-    def add_path(self, u: int, v: int, x: int):
-        """
-        Function description:
-        Add a path from one Location to another in the graph.
-
-        :Input:
-        u: int, index of the source Location
-        v: int, index of the destination Location
-        x: int, travel time of the path
-
-        :Output, return or postcondition:
-        add path to locations
-
-        :Time complexity:
-        O(1)
-
-        :Aux space complexity:
-        O(1)
-        """
-        path = Path(self.locations[v], x)
-        self.locations[u].paths.append(path)
-
     def construct_graph(self, paths: List[Tuple[int,int,int]], keys: List[Tuple[int,int]]):
         """
         Function description:
@@ -229,14 +207,14 @@ class FloorGraph:
         O(|V| + |E|), because we are initializing each location and path
         """
         for i in range(max(max(paths, key=lambda x: max(x[:2]))[:2]) + 1):
-            self.locations.append(Location(i)) # Adding 1 to the maximum index found ensures that there will be enough locations for
-            # all locations referenced in the paths.
+            self.locations.append(Location(i))
 
         for key in keys:
             self.keys.append(Key(key[0], key[1]))
 
         for path in paths:
-            self.add_path(*path)
+            u, v, x = path
+            self.locations[u].paths.append(Path(self.locations[v], x))
 
     def dijkstra(self, start_index:int):
         """
@@ -381,9 +359,8 @@ class FloorGraph:
         new_location = Location(len(self.locations))
         self.locations.append(new_location)
 
-        for exit_location in exits:
-            exit_path = Path(self.locations[exit_location], 0)
-            new_location.paths.append(exit_path)
+        for exit_location in exits: #adding connections to the exit locations
+            new_location.paths.append(Path(self.locations[exit_location], 0))
 
     def get_minimum_time_to_key(self, start_index: int):
         """
