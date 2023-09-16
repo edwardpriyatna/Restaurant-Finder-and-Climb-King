@@ -3,33 +3,33 @@ import heapq
 def restaurantFinder(d: int, site_list: List[int]) -> Tuple[int, List[int]]:
     """
     Function description:
-    This function assists a fast food chain in selecting optimal sites for opening restaurants. The selection is done such that
-    no two restaurants are within 'd' km of each other and the total revenue is maximized.
+    This function assists a fast food chain in selecting optimal sites for opening restaurants. The selection is done
+    such that no two restaurants are within 'd' km of each other and the total revenue is maximized.
 
     Approach description:
     The function uses a dynamic programming approach. It maintains two lists: 'total_revenue' and 'selected_sites'. The
-    'total_revenue' list stores the maximum revenue that can be obtained for each site. The 'selected_sites' list stores the
-    sites that are selected to achieve this maximum revenue. For each site, the function considers two options: including the
-    current site or excluding it. It compares the total revenue obtained from these two options and chooses the one with maximum
-    revenue. After finding the maximum total revenue for all sites, the function reconstructs the list of selected sites by
-    iterating over the 'selected_sites' list in reverse order.
+    'total_revenue' list stores the maximum revenue that can be obtained for each site. The 'selected_sites' list stores
+    the sites that are selected to achieve this maximum revenue. For each site, the function considers two options:
+    including the current site or excluding it. It compares the total revenue obtained from these two options and chooses
+    the one with maximum revenue. After finding the maximum total revenue for all sites, the function reconstructs the
+    list of selected sites by iterating over the 'selected_sites' list in reverse order.
 
     :Input:
     d: The minimum distance between any two chosen sites.
     site_list: A list of revenues for each site.
 
     :Output, return or postcondition:
-    The function returns a tuple with two elements: The maximum total revenue that can be obtained and a list of the chosen
-    sites that are 1-indexed.
+    The function returns a tuple with two elements: The maximum total revenue that can be obtained and a list of the
+    chosen sites that are 1-indexed.
 
     :Time complexity:
-    O(N), where N is the number of potential sites. This is because the function makes a single pass over the list of potential
-    sites. For each site, it performs a constant amount of work.
+    O(N), where N is the number of potential sites. This is because the function makes a single pass over the list of
+    potential sites. For each site, it performs a constant amount of work.
 
     :Aux space complexity:
-    O(N). The function maintains two lists 'total_revenue' and 'selected_sites', each of which has a length of N. These lists are
-    used to store intermediate results during computation. Since these lists have a size proportional to the number of sites, the
-    complexity is O(N).
+    O(N). The function maintains two lists 'total_revenue' and 'selected_sites', each of which has a length of N. These
+    lists are used to store intermediate results during computation. Since these lists have a size proportional to the
+    number of sites, the complexity is O(N).
     """
     N = len(site_list)
     total_revenue = [0]*N
@@ -64,7 +64,7 @@ def restaurantFinder(d: int, site_list: List[int]) -> Tuple[int, List[int]]:
                 total_revenue[i] = exclude_site
                 selected_sites[i] = selected_sites[i-1].copy()
 
-    return (total_revenue[-1], [site+1 for site in selected_sites[-1]])  # Convert to 1-indexed sites
+    return (total_revenue.pop(), [site+1 for site in selected_sites[-1]])  # Convert to 1-indexed sites
 
 class Location:
     def __init__(self, ID: int):
@@ -110,11 +110,6 @@ class Location:
         """
         return self.time_to_reach < other.time_to_reach
 
-    def __str__(self) -> str:
-        return f"Vertex {self.ID}, visited {self.visited}, discovered {self.discovered}, " \
-               f"time_to_reach {self.time_to_reach}, edges {[str(path) for path in self.paths]}, " \
-               f"previous_vertex {self.previous_location.ID if self.previous_location else None}"
-
 class Path:
     def __init__(self, v: 'Location', x:int):
         """
@@ -137,8 +132,6 @@ class Path:
         self.v = v
         self.x = x
 
-    def __str__(self) -> str:
-        return f"Edge to {self.v.ID}, weight {self.x}"
 class Key:
     def __init__(self, k: int, y:int):
         """
@@ -162,9 +155,6 @@ class Key:
         self.time_to_reach_key = 0
         self.y = y
 
-    def __str__(self) -> str:
-        return f"Weight of vertex {self.k} with distance to reach {self.time_to_reach_key} " \
-               f"and distance to get {self.y}"
 class FloorGraph:
     def __init__(self, paths: List[Tuple[int,int,int]], keys: List[Tuple[int,int]]):
         """
@@ -172,8 +162,8 @@ class FloorGraph:
         Initialize a FloorGraph object and construct the graph.
 
         :Input:
-        paths: List[Tuple[int,int,int]], list of paths represented as [u, v, x]. u is the source, v is the destination, and
-        x is the travel time
+        paths: List[Tuple[int,int,int]], list of paths represented as [u, v, x]. u is the source, v is the destination,
+        and x is the travel time
         keys: List[List[int]], list of keys represented as [k, y]
 
         :Output, return or postcondition:
@@ -290,13 +280,13 @@ class FloorGraph:
         Update the time_to_reach of each location
 
         :Time complexity:
-        O(|E| log(|V|)). |V| is the number of locations and |E| is the total number of paths. Because each location is inserted
-        into the priority queue once which costs O(log |V|) time. For each path, we perform a decrease-key operation on
-        the heap which also costs O(log |V|) time. So, the total time complexity is O(|E| log(|V|)).
+        O(|E| log(|V|)). |V| is the number of locations and |E| is the total number of paths. Because each location is
+        inserted into the priority queue once which costs O(log |V|) time. For each path, we perform a decrease-key
+        operation on the heap which also costs O(log |V|) time. So, the total time complexity is O(|E| log(|V|)).
 
         :Aux space complexity:
-        O(|V|+|E|) because we need to store the locations in the priority queue. In the worst case, all locations will be
-        in the queue at once.
+        O(|V|+|E|) because we need to store the locations in the priority queue. In the worst case, all locations will
+        be in the queue at once.
         """
         queue = []
         start_location.time_to_reach = 0
@@ -437,8 +427,8 @@ class FloorGraph:
         Update the time to reach for each key based on the time to reach the location where the key is at.
 
         :Time complexity:
-        O(|E|log(|V|)). Where |E| is the number of edges and |V| is the number of vertices. Runs Dijkstra’s, which has time
-        complexity of O(|E| log(|V|)), and then updates the time to reach each key, which takes O(|V|) time.
+        O(|E|log(|V|)). Where |E| is the number of edges and |V| is the number of vertices. Runs Dijkstra’s, which has
+        time complexity of O(|E| log(|V|)), and then updates the time to reach each key, which takes O(|V|) time.
 
         :Aux space complexity:
         O(|V|+|E|), as it runs Dijkstra’s algorithm.
@@ -452,13 +442,16 @@ class FloorGraph:
     def find_location_to_grab_key(self, start: int, exits: List[int]) -> 'Key':
         """
         Function description:
-        Find the Location to grab a key to minimize time. First I'm going to get the minimum time of each key from a start
-        location. Then I would add the time_to_reach of each location to the corresponding key. I then reset the graph because
-        the time_to_reach for each location has been changed by the Djikstra's. Then I flip the graph and create a new location
-        that is connected to all exits with an edge of weight 0. Now I'm going to get the minimum time of each key from the
-        new location. Then I would add the time_to_reach of each location from the new location to the corresponding key.
-        I then find a key that has the minimum combination of time to reach from start, time to reach from the new location,
-        and the time to fight monster of that key.
+        Find the Location to grab a key to minimize time.
+
+        Approach description:
+        First I'm going to get the minimum time of each key from a start location. Then I would add the time_to_reach of
+        each location to the corresponding key. I then reset the graph because the time_to_reach for each location has
+        been changed by the Dijkstra's. Then I flip the graph and create a new location that is connected to all exits
+        with an edge of weight 0. Now I'm going to get the minimum time of each key from the new location. Then I would
+        add the time_to_reach of each location from the new location to the corresponding key. I then find a key that
+        has the minimum combination of time to reach from start, time to reach from the new location, and the time to
+        fight monster of that key.
 
         :Input:
         start: int, index of the starting key
@@ -479,13 +472,16 @@ class FloorGraph:
         self.flip_graph()
         self.add_new_location(exits)
         self.get_minimum_time_to_key(len(self.locations) - 1)
-        self.flip_graph() #also flips the connections to the new location which would be beneficial in climb
+        self.flip_graph() # also flips the connections to the new location which would be beneficial in climb
         self.reset()
         return min(self.keys, key=lambda key: key.time_to_reach_key + key.y)
 
     def climb(self, start: int, exits: List[int]) -> Optional[tuple]:
         """
         Function description:
+        The main climb function.
+
+        Approach description:
         Find the location to grab key from. Then get the shortest path from the start to the location to grab key from.
         Then get the shortest path from the location to grab key from to the new location we created in add new location.
         return the total time to get key and the combination of those two paths that we get.
@@ -509,7 +505,7 @@ class FloorGraph:
         route_part1 = self.get_shortest_path(start, location_to_grab_key.k)
         if route_part1 is None:
             return None
-        route_part1.pop()  #pop the location where the key is grabbed
+        route_part1.pop()  # pop the location where the key is grabbed
 
         self.reset()
         route_part2 = self.get_shortest_path(location_to_grab_key.k, len(self.locations) - 1) #getting shortest path to new location
@@ -559,7 +555,7 @@ class FloorGraph:
         :Time complexity:
         O(|V| + |E|), where |V| is the number of vertices (locations) and |E| is the number of edges (paths).
         This is because it needs to remove the last vertex from the list of vertices (which takes O(1) time),
-        and then it needs to iterate over all remaining vertices and their edges to remove any edges that lead to the
+        and then it needs to iterate over all remaining vertices and their edges to remove any edges that leads to the
         deleted vertex (which takes O(|V| + |E|) time).
 
         :Aux space complexity:
@@ -567,23 +563,10 @@ class FloorGraph:
         """
         new_location = self.locations.pop()
 
-        for location in self.locations: #deleting all connections to the new location
+        for location in self.locations: # deleting all connections to the new location
             location.paths = [path for path in location.paths if path.v != new_location]
 
-    def __str__(self) -> str:
-        return "\n".join(str(location) for location in self.locations)
 
-if __name__ == '__main__':
-    # The paths represented as a list of tuples
-    paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2),
-             (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4), (7, 8, 2),
-             (8, 7, 2), (7, 3, 2), (8, 0, 11), (4, 3, 1), (4, 8, 10)]
-    # The keys represented as a list of tuples
-    keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
-    # Creating a FloorGraph object based on the given paths
-    myfloor = FloorGraph(paths, keys)
-    start = 1
-    exits = [3, 4]
 
 
 
