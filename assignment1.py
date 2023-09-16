@@ -416,7 +416,7 @@ class FloorGraph:
 
         :Time complexity:
         O(|V|). But originally O(|N|), where |N| is the number of elements in the exits list.
-        For each exit, it performs an operation. But there is at most |V| exits.
+        For each exit, connect the new location to that exit. But there is at most |V| exits.
 
         :Aux space complexity:
         O(|V|). But originally O(|N|), where |N| is the number of elements in the exits list.
