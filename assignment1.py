@@ -111,12 +111,6 @@ class Location:
         """
         return self.time_to_reach < other.time_to_reach
 
-    def __str__(self) -> str:
-        return f"Vertex {self.ID}, visited {self.visited}, discovered {self.discovered}, " \
-               f"time_to_reach {self.time_to_reach}, edges {[str(path) for path in self.paths]}, " \
-               f"previous_vertex {self.previous_location.ID if self.previous_location else None}"
-
-
 class Path:
     def __init__(self, v: 'Location', x:int):
         """
@@ -138,9 +132,6 @@ class Path:
         """
         self.v = v
         self.x = x
-
-    def __str__(self) -> str:
-        return f"Edge to {self.v.ID}, weight {self.x}"
 
 class Key:
     def __init__(self, k: int, y:int):
@@ -164,10 +155,6 @@ class Key:
         self.k = k
         self.time_to_reach_key = 0
         self.y = y
-
-    def __str__(self) -> str:
-        return f"Weight of vertex {self.k} with distance to reach {self.time_to_reach_key} " \
-               f"and distance to get {self.y}"
 
 class FloorGraph:
     def __init__(self, paths: List[Tuple[int,int,int]], keys: List[Tuple[int,int]]):
@@ -513,7 +500,7 @@ class FloorGraph:
         route_part1 = self.get_shortest_path(start, location_to_grab_key.k)
         if route_part1 is None:
             return None
-        route_part1.pop()  # pop the location where the key is grabbed
+        route_part1.pop()  #pop the location where the key is grabbed
 
         self.reset()
         route_part2 = self.get_shortest_path(location_to_grab_key.k, len(self.locations) - 1) #getting shortest path to new location
@@ -574,21 +561,6 @@ class FloorGraph:
         for location in self.locations:
             location.paths = [path for path in location.paths if path.v != new_location]
 
-    def __str__(self) -> str:
-        return "\n".join(str(location) for location in self.locations)
 
-if __name__ == '__main__':
-    # The paths represented as a list of tuples
-    paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2),
-             (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4), (7, 8, 2),
-             (8, 7, 2), (7, 3, 2), (8, 0, 11), (4, 3, 1), (4, 8, 10)]
-    # The keys represented as a list of tuples
-    keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
-    # Creating a FloorGraph object based on the given paths
-    myfloor = FloorGraph(paths, keys)
-    start = 1
-    exits = [3, 4]
-    print(myfloor.climb(start,exits))
-    #print(myfloor)
 
 
