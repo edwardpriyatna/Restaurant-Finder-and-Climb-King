@@ -3,7 +3,8 @@ import heapq
 def restaurantFinder(d: int, site_list: List[int]) -> Tuple[int, List[int]]:
     """
     Function description:
-    This function assists a fast food chain in selecting optimal sites for opening restaurants. The selection is done such that no two restaurants are within 'd' km of each other and the total revenue is maximized[^1^][1][^2^][2].
+    This function assists a fast food chain in selecting optimal sites for opening restaurants. The selection is done such that
+    no two restaurants are within 'd' km of each other and the total revenue is maximized.
 
     Approach description:
     The function uses a dynamic programming approach. It maintains two lists: 'total_revenue' and 'selected_sites'. The
@@ -19,7 +20,7 @@ def restaurantFinder(d: int, site_list: List[int]) -> Tuple[int, List[int]]:
 
     :Output, return or postcondition:
     The function returns a tuple with two elements: The maximum total revenue that can be obtained and a list of the chosen
-    sites (1-indexed).
+    sites that are 1-indexed.
 
     :Time complexity:
     O(N), where N is the number of potential sites. This is because the function makes a single pass over the list of potential
