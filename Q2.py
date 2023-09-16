@@ -240,20 +240,22 @@ class FloorGraph:
         and it needs to store the shortest path (which also takes O(|V|) space in the worst case).
         """
         start_location = self.locations[start_index]
+        print('start loc')
         end_location = self.locations[end_index]
+        print('end loc')
         self.dijkstra(start_location)
-
+        print('did djikta')
         if end_location.time_to_reach == float('inf'):
+            print('if contion')
             return None
 
         path = []
-        current_location = end_location
-
+        current_location=end_location
         while current_location is not None:
-            path.insert(0, current_location.ID)
+            path.append(current_location.ID)
             current_location = current_location.previous_location
 
-        return path
+        return path.reverse()
 
     def reset(self):
         """
@@ -518,9 +520,6 @@ if __name__ == '__main__':
     times = [9, 6, 10, 11, 20]
     routes = [[1, 7], [7, 8], [1, 5, 6, 3], [1, 5, 6, 4], [3, 4, 8, 7, 3, 4]]
 
-    for i in range(5):
-        total_time, route = graph.climb(starts[i], exits[i])
-        # testing
-        print('total time',total_time)
-        print('route',route)
+    print(graph.get_shortest_path(1,7))
+    print(graph)
 

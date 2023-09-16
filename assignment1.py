@@ -319,8 +319,8 @@ class FloorGraph:
         Optional[List[int]], a list of Location indices representing the shortest path, or None if no path exists
 
         :Time complexity:
-        O(|E| log(|V|)), runs Dijkstra’s algorithm, which has a time complexity of O(|E| log(|V|)),
-        then traces the shortest path from the end location to the start location, which has a time complexity of O(|V|).
+        O(|E| log(|V|)), runs Dijkstra’s algorithm, which has a time complexity of O(|E| log(|V|)). |V| can be ignored
+        because it doesn't scale as much |E|LOG(|V|).
 
         :Aux space complexity:
         O(|V|+|E|), needs to store the locations in the priority queue for Dijkstra’s algorithm (which takes O(|V|) space),
@@ -329,18 +329,15 @@ class FloorGraph:
         start_location = self.locations[start_index]
         end_location = self.locations[end_index]
         self.dijkstra(start_location)
-
         if end_location.time_to_reach == float('inf'):
             return None
-
         path = []
         current_location = end_location
-
         while current_location is not None:
-            path.insert(0, current_location.ID)
+            path.append(current_location.ID)
             current_location = current_location.previous_location
 
-        return path
+        return list(reversed(path)) #reverse the path because this function actually returns the reversed sequences
 
     def reset(self):
         """
@@ -569,6 +566,17 @@ class FloorGraph:
         for location in self.locations:
             location.paths = [path for path in location.paths if path.v != new_location]
 
-
+if __name__ == '__main__':
+    # The paths represented as a list of tuples
+    paths = [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 1), (1, 5, 2),
+             (5, 6, 5), (6, 3, 2), (6, 4, 3), (1, 7, 4), (7, 8, 2),
+             (8, 7, 2), (7, 3, 2), (8, 0, 11), (4, 3, 1), (4, 8, 10)]
+    # The keys represented as a list of tuples
+    keys = [(5, 10), (6, 1), (7, 5), (0, 3), (8, 4)]
+    # Creating a FloorGraph object based on the given paths
+    myfloor = FloorGraph(paths, keys)
+    start = 1
+    exits = [3, 4]
+    print(myfloor.get_shortest_path(1,6))
 
 
