@@ -336,8 +336,7 @@ class FloorGraph:
         O(|E| log(|V|)), runs Dijkstra’s algorithm, which has a time complexity of O(|E| log(|V|)).
 
         :Aux space complexity:
-        O(|V|+|E|), needs to store the locations in the priority queue for Dijkstra’s algorithm (which takes O(|V|) space),
-        and it needs to store the shortest path (which also takes O(|V|) space in the worst case).
+        O(|V|+|E|), needs to run Dijkstra's.
         """
         start_location = self.locations[start_index]
         end_location = self.locations[end_index]
@@ -483,9 +482,13 @@ class FloorGraph:
         self.reset()
         self.flip_graph()
         self.add_new_location(exits)
+        print('graph befroe eset')
+        print(self)
         self.get_minimum_time_to_key(len(self.locations) - 1)
         self.flip_graph()
         self.reset()
+        print('graph after reset')
+        print(self)
         return min(self.keys, key=lambda key: key.time_to_reach_key + key.y)
 
     def climb(self, start: int, exits: List[int]) -> Optional[tuple]:
@@ -590,6 +593,6 @@ if __name__ == '__main__':
     start = 1
     exits = [3, 4]
     print(myfloor.climb(start,exits))
-    print(myfloor)
+    #print(myfloor)
 
 
