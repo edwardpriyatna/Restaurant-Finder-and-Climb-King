@@ -405,7 +405,8 @@ class FloorGraph:
     def add_new_location(self, exits: List[int]):
         """
         Function description:
-        Adds a new location that is connected to all exits by paths with travel_time 0.
+        Adds a new location that is connected to all exits by paths with travel_time 0. But doesn't connect the other
+        way around.
 
         :Input:
         Exits: List[int], list of exit Locations indexes
