@@ -161,6 +161,9 @@ class FloorGraph:
         Function description:
         Initialize a FloorGraph object and construct the graph.
 
+        Approach description:
+        I initialize the attributes then call construct_graph.
+
         :Input:
         paths: List[Tuple[int,int,int]], list of paths represented as [u, v, x]. u is the source, v is the destination,
         and x is the travel time
@@ -178,44 +181,6 @@ class FloorGraph:
         self.locations = []
         self.keys = []
         self.construct_graph(paths, keys)
-
-    def add_location(self, location: 'Location'):
-        """
-        Function description:
-        Add a location to the locations list inside class Graph.
-
-        :Input:
-        Location: Location object, the location we want to add
-
-        :Output, return or postcondition:
-        Add location to locations
-
-        :Time complexity:
-        O(1)
-
-        :Aux space complexity:
-        O(1)
-        """
-        self.locations.append(location)
-
-    def add_key(self, key: 'Key'):
-        """
-        Function description:
-        Add a key to the keys lust.
-
-        :Input:
-        key: Key object, the key we want to add
-
-        :Output, return or postcondition:
-        Add key to keys
-
-        :Time complexity:
-        O(1)
-
-        :Aux space complexity:
-        O(1)
-        """
-        self.keys.append(key)
 
     def add_path(self, u: int, v: int, x: int):
         """
@@ -236,13 +201,18 @@ class FloorGraph:
         :Aux space complexity:
         O(1)
         """
-        path_instance = Path(self.locations[v], x)
-        self.locations[u].paths.append(path_instance)
+        path = Path(self.locations[v], x)
+        self.locations[u].paths.append(path)
 
     def construct_graph(self, paths: List[Tuple[int,int,int]], keys: List[Tuple[int,int]]):
         """
         Function description:
         Construct the graph with the given paths and keys.
+
+        Approach description:
+        I identify the highest index of a location entered. Add 1 to the highest index to ensure that it loops
+        through all of them. Then I added the locations to self.locations, added keys to self.keys, and added the path
+        to each location.
 
         :Input:
         paths: List[Tuple[int,int,int]], list of paths represented as [u, v, x]
@@ -258,12 +228,12 @@ class FloorGraph:
         :Aux space complexity:
         O(|V| + |E|), because we are initializing each location and path
         """
-        for i in range(max(max(paths, key=lambda x: max(x[:2]))[:2]) + 1): #identifies the highest index of a location used in any path.
-            self.add_location(Location(i)) # Adding 1 to the maximum index found ensures that there will be enough locations for
+        for i in range(max(max(paths, key=lambda x: max(x[:2]))[:2]) + 1):
+            self.locations.append(Location(i)) # Adding 1 to the maximum index found ensures that there will be enough locations for
             # all locations referenced in the paths.
 
         for key in keys:
-            self.add_key(Key(key[0], key[1]))
+            self.keys.append(Key(key[0], key[1]))
 
         for path in paths:
             self.add_path(*path)
@@ -482,9 +452,9 @@ class FloorGraph:
         The main climb function.
 
         Approach description:
-        Find the location to grab key from. Then get the shortest path from the start to the location to grab key from.
-        Then get the shortest path from the location to grab key from to the new location we created in add new location.
-        return the total time to get key and the combination of those two paths that we get.
+        Find the location to grab key from (see find_location_to_grab_key). Then get the shortest path from the start to
+        the location to grab key from. Then get the shortest path from the location to grab key from to the new location
+        we created in add new location. return the total time to get key and the combination of those two paths that we got.
         :Input:
         argv1: int - index of the starting key
         argv2: List[int] - list of indices of exit Locations
@@ -559,7 +529,7 @@ class FloorGraph:
         deleted vertex (which takes O(|V| + |E|) time).
 
         :Aux space complexity:
-        O(1), does not use any additonal space.
+        O(1), does not use any additional space.
         """
         new_location = self.locations.pop()
 
