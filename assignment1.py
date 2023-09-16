@@ -441,8 +441,8 @@ class FloorGraph:
         Update the time to reach for each key based on the time to reach the location where the key is at.
 
         :Time complexity:
-        O(|E|log(|V|)). Where |E| is the number of edges and |V| is the number of vertices. Runs Dijkstra’s algorithm,
-        which has a time complexity of O(|E| log(|V|)), and then updates the time to reach each key, which takes O(|V|) time.
+        O(|E|log(|V|)). Where |E| is the number of edges and |V| is the number of vertices. Runs Dijkstra’s, which has time
+        complexity of O(|E| log(|V|)), and then updates the time to reach each key, which takes O(|V|) time.
 
         :Aux space complexity:
         O(|V|+|E|), as it runs Dijkstra’s algorithm.
@@ -472,9 +472,8 @@ class FloorGraph:
         Key: the Key object representing the optimal location to grab a key
 
         :Time complexity:
-        Time Complexity: O(|E|log(|V|)), where |E| is the number of edges, |V| is the number of vertices. This is because it
-        runs Dijkstra’s algorithm twice, with time complexity  of O(|E| log(|V|)) each time, and then finds the minimum key,
-        which takes O(|V|) time.
+        Time Complexity: O(|E|log(|V|)), where |E| is the number of edges, |V| is the number of vertices. Runs Dijkstra’s
+        twice, with time complexity of O(|E| log(|V|)). Then finds the minimum key, which takes O(|V|) time.
 
         :Aux space complexity:
         O(|V| + |E|), because it runs Djikstra's
@@ -503,9 +502,9 @@ class FloorGraph:
         or None if no route is found
 
         :Time complexity:
-        O(|E|log(|V|)), Getting the shortest path uses Dijkstra’s algorithm, so its time complexity is O(|E|log(|V|)).
-        Resetting the graph, delete new location, and resetting weight all have time complexity of O(|V|). So, the time
-        complexity is O(|E|log(|V|)).
+        O(|E|log(|V|)). Finding the location to grab the key and getting the shortest path both uses Dijkstra’s, the time
+        complexity are both O(|E|log(|V|)). Combined, the time complexity is O(|E|log(|V|)). Resetting the graph, delete new
+        location, and resetting weight all have time complexity of O(|V|). So, the time complexity is O(|E|log(|V|)).
 
         :Aux space complexity:
         O(|V|+|E|), from running Djikstra's and deleting new location.
@@ -541,9 +540,8 @@ class FloorGraph:
         Resets the time_to_reach for each key
 
         :Time complexity:
-        O(|V|). But originally O(|K|) where |K| is the number of keys.
-        This is because it needs to iterate over all keys to reset their time_to_reach attribute.
-        But there is at most |V| keys.
+        O(|V|). But originally O(|K|) where |K| is the number of keys. Needs to iterate over all keys to reset their
+        time_to_reach_key attribute. But there is at most |V| keys.
 
         :Aux space complexity:
         O(1), as it does not use any additional space.
