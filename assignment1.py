@@ -3,33 +3,32 @@ import heapq
 def restaurantFinder(d: int, site_list: List[int]) -> Tuple[int, List[int]]:
     """
     Function description:
-    This function helps a fast food chain to choose the sites to open restaurants such that no two restaurants are
-    within a certain time of each other and the overall revenue is maximised.
+    This function assists a fast food chain in selecting optimal sites for opening restaurants. The selection is done such that no two restaurants are within 'd' km of each other and the total revenue is maximized[^1^][1][^2^][2].
 
     Approach description:
-    The function uses dynamic programming to solve this problem. It maintains an array `max_revenue` to store the maximum
-    revenue that can be obtained for each site, and an array `chosen_sites` to store the chosen sites that contribute to the
-    maximum revenue.
+    The function uses a dynamic programming approach. It maintains two lists: 'total_revenue' and 'selected_sites'. The
+    'total_revenue' list stores the maximum revenue that can be obtained for each site. The 'selected_sites' list stores the
+    sites that are selected to achieve this maximum revenue. For each site, the function considers two options: including the
+    current site or excluding it. It compares the total revenue obtained from these two options and chooses the one with maximum
+    revenue. After finding the maximum total revenue for all sites, the function reconstructs the list of selected sites by
+    iterating over the 'selected_sites' list in reverse order.
 
     :Input:
-    d: The minimum time between any two chosen sites.
+    d: The minimum distance between any two chosen sites.
     site_list: A list of revenues for each site.
 
     :Output, return or postcondition:
-    The function returns a tuple with two elements:
-    - The maximum total revenue that can be obtained.
-    - A list of the chosen sites (1-indexed).
+    The function returns a tuple with two elements: The maximum total revenue that can be obtained and a list of the chosen
+    sites (1-indexed).
 
     :Time complexity:
-    O(N), where N is the number of potential sites. This is because the function makes a single pass over the list of potential sites.
-    For each site, it performs a constant amount of work. It makes comparisons and mathematical operations, and it may copy a list.
-    All these operations take constant time, so the total time complexity is proportional to the number of sites, hence O(N).
+    O(N), where N is the number of potential sites. This is because the function makes a single pass over the list of potential
+    sites. For each site, it performs a constant amount of work.
 
     :Aux space complexity:
-    O(N). The two lists total_revenue and selected_sites that the function maintains, each of which has a length of N.
-    These lists are used to store intermediate results during computation. total_revenue[i] stores the maximum total revenue
-    that can be obtained by considering the first i+1 sites, and selected_sites[i] stores the chosen sites that contribute to
-    this maximum revenue. Since these lists have a size proportional to the number of sites, the complexity is O(N).
+    O(N). The function maintains two lists 'total_revenue' and 'selected_sites', each of which has a length of N. These lists are
+    used to store intermediate results during computation. Since these lists have a size proportional to the number of sites, the
+    complexity is O(N).
     """
     N = len(site_list)
     total_revenue = [0]*N
@@ -65,7 +64,6 @@ def restaurantFinder(d: int, site_list: List[int]) -> Tuple[int, List[int]]:
                 selected_sites[i] = selected_sites[i-1].copy()
 
     return (total_revenue[-1], [site+1 for site in selected_sites[-1]])  # Convert to 1-indexed sites
-
 
 class Location:
     def __init__(self, ID: int):
